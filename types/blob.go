@@ -32,7 +32,7 @@ func NewBlob(r io.Reader) (Blob, error) {
 	var blob blobLeaf
 	for {
 		buf := bytes.Buffer{}
-		n, err := copyChunk(&buf, r)
+		n, err := CopyChunk(&buf, r)
 		if err != nil {
 			return nil, err
 		}
@@ -62,10 +62,10 @@ func BlobFromVal(v Value) Blob {
 	return v.(Blob)
 }
 
-// copyChunk copies from src to dst until a chunk boundary is found.
+// CopyChunk copies from src to dst until a chunk boundary is found.
 // It returns the number of bytes copied and the earliest error encountered while copying.
-// copyChunk never returns an io.EOF error, instead it returns the number of bytes read up to the io.EOF.
-func copyChunk(dst io.Writer, src io.Reader) (n uint64, err error) {
+// CopyChunk never returns an io.EOF error, instead it returns the number of bytes read up to the io.EOF.
+func CopyChunk(dst io.Writer, src io.Reader) (n uint64, err error) {
 	h := buzhash.NewBuzHash(windowSize)
 	p := []byte{0}
 
