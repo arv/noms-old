@@ -4,7 +4,8 @@ import (
 	"bytes"
 	"io"
 
-	"github.com/attic-labs/buzhash"
+	// "github.com/attic-labs/buzhash"
+	"github.com/attic-labs/noms/rabinkarp"
 	"github.com/attic-labs/noms/ref"
 )
 
@@ -66,7 +67,8 @@ func BlobFromVal(v Value) Blob {
 // It returns the number of bytes copied and the earliest error encountered while copying.
 // CopyChunk never returns an io.EOF error, instead it returns the number of bytes read up to the io.EOF.
 func CopyChunk(dst io.Writer, src io.Reader) (n uint64, err error) {
-	h := buzhash.NewBuzHash(windowSize)
+	// h := buzhash.NewBuzHash(windowSize)
+	h := rabinkarp.NewRabinKarp(windowSize)
 	p := []byte{0}
 
 	for {
