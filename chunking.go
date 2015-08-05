@@ -43,22 +43,21 @@ func main() {
 		}
 
 		r := bufio.NewReader(f)
-		readAtLeast(r, 1<<63)
+		readData(r)
 	}
 
 	if flag.NArg() == 0 {
-		size := 1 << 11
 		fmt.Printf("Using random stream\n")
-		readAtLeast(rand.Reader, uint64(size))
+		readData(io.LimitReader(rand.Reader, 10e6))
 	}
 }
 
-func readAtLeast(r io.Reader, count uint64) {
+func readData(r io.Reader) {
 	lengths := []uint64{}
 
 	size := uint64(0)
 
-	for i := uint64(0); i < count; i++ {
+	for {
 		w := bytes.Buffer{}
 		n, err := types.CopyChunk(&w, r)
 		if n == 0 {
@@ -73,8 +72,12 @@ func readAtLeast(r io.Reader, count uint64) {
 		lengths = append(lengths, n)
 	}
 
-	a := avg(lengths)
-	s := stddev(lengths)
+	var a, s uint64
+	// skip the last one since it will skew the average/stddev.
+	if len(lengths) > 2 {
+		a = avg(lengths[:len(lengths)-1])
+		s = stddev(lengths[:len(lengths)-1])
+	}
 
 	fmt.Printf("Size: %d, Count: %d, Avg: %d, StdDev: %d\n", size, len(lengths), a, s)
 }
