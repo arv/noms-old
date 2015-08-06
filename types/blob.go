@@ -2,11 +2,12 @@ package types
 
 import (
 	"bytes"
+	"hash"
 	"io"
 
-	// "github.com/attic-labs/buzhash"
+	"github.com/attic-labs/buzhash"
 	// "github.com/attic-labs/noms/rabinkarp"
-	"github.com/attic-labs/noms/adler32"
+	// "github.com/attic-labs/noms/adler32"
 
 	"github.com/attic-labs/noms/ref"
 )
@@ -65,13 +66,23 @@ func BlobFromVal(v Value) Blob {
 	return v.(Blob)
 }
 
+var HashFunc func(windowSize uint32) hash.Hash32
+
+func getHash() hash.Hash32 {
+	if HashFunc != nil {
+		return HashFunc(windowSize)
+	}
+	return buzhash.NewBuzHash(windowSize)
+}
+
 // CopyChunk copies from src to dst until a chunk boundary is found.
 // It returns the number of bytes copied and the earliest error encountered while copying.
 // CopyChunk never returns an io.EOF error, instead it returns the number of bytes read up to the io.EOF.
 func CopyChunk(dst io.Writer, src io.Reader) (n uint64, err error) {
 	// h := buzhash.NewBuzHash(windowSize)
 	// h := rabinkarp.NewRabinKarp(windowSize)
-	h := adler32.NewAdler32(windowSize)
+	// h := adler32.NewAdler32(windowSize)
+	h := getHash()
 	p := []byte{0}
 
 	for {

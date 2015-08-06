@@ -6,11 +6,18 @@ import (
 	"crypto/rand"
 	"flag"
 	"fmt"
+	"hash"
 	"io"
+	"io/ioutil"
 	"math"
 	"os"
+	"path/filepath"
 
 	"github.com/attic-labs/noms/types"
+
+	"github.com/attic-labs/buzhash"
+	"github.com/attic-labs/noms/adler32"
+	"github.com/attic-labs/noms/rabinkarp"
 )
 
 func avg(ns []uint64) uint64 {
@@ -32,27 +39,56 @@ func stddev(ns []uint64) uint64 {
 	return uint64(math.Sqrt(float64(variance)))
 }
 
+func BuzHash(windowSize uint32) hash.Hash32 {
+	return buzhash.NewBuzHash(windowSize)
+}
+
+func RabinKarp(windowSize uint32) hash.Hash32 {
+	return rabinkarp.NewRabinKarp(windowSize)
+}
+
+func Adler32(windowSize uint32) hash.Hash32 {
+	return adler32.NewAdler32(windowSize)
+}
+
+type test struct {
+	name    string
+	pattern string
+}
+
+type suite struct {
+	name string
+	f    func(ws uint32) hash.Hash32
+}
+
 func main() {
 	flag.Parse()
-	for _, arg := range flag.Args() {
-		fmt.Printf("File name: %s\n", arg)
-		f, err := os.Open(arg)
-		if err != nil {
-			fmt.Println("Error: ", err)
-			os.Exit(1)
-		}
 
-		r := bufio.NewReader(f)
-		readData(r)
+	tests := []test{
+		{"Movie", "*.mkv"},
+		{"Jpegs", "*.jpg"},
+		{"Pdfs", "*.pdf"},
 	}
 
-	if flag.NArg() == 0 {
-		fmt.Printf("Using random stream\n")
-		readData(io.LimitReader(rand.Reader, 10e6))
+	suites := []suite{
+		{"Adler32", Adler32},
+		{"BuzHash", BuzHash},
+		{"RabinKarp", RabinKarp},
+	}
+
+	buf, _ := ioutil.ReadAll(io.LimitReader(rand.Reader, 10e6))
+
+	fmt.Printf("Suite, Test, Size, Count, Average, StdDev\n")
+	for _, s := range suites {
+		types.HashFunc = s.f
+		readData(s.name, "Stream", bytes.NewBuffer(buf))
+		for _, t := range tests {
+			doFileTest(s.name, t.name, flag.Arg(0)+t.pattern, s.f)
+		}
 	}
 }
 
-func readData(r io.Reader) {
+func readData(suite, test string, r io.Reader) {
 	lengths := []uint64{}
 
 	size := uint64(0)
@@ -79,5 +115,20 @@ func readData(r io.Reader) {
 		s = stddev(lengths[:len(lengths)-1])
 	}
 
-	fmt.Printf("Size: %d, Count: %d, Avg: %d, StdDev: %d\n", size, len(lengths), a, s)
+	fmt.Printf("%s, %s, %d, %d, %d, %d\n", suite, test, size, len(lengths), a, s)
+}
+
+func doFileTest(suite, test, pattern string, f func(ws uint32) hash.Hash32) {
+	matches, _ := filepath.Glob(pattern)
+
+	for _, n := range matches {
+		f, err := os.Open(n)
+		if err != nil {
+			fmt.Println("Error: ", err)
+			os.Exit(1)
+		}
+
+		r := bufio.NewReader(f)
+		readData(suite, test, r)
+	}
 }
