@@ -12,19 +12,19 @@ const (
 	UInt64Kind
 	Int8Kind
 	Int16Kind
-	Int32Kind
-	Int64Kind
-	Float32Kind
-	Float64Kind
-	StringKind
-	BlobKind
-	ValueKind
-	ListKind
-	MapKind
-	RefKind
-	SetKind
-	EnumKind
-	StructKind
+	Int32Kind   // 8
+	Int64Kind   // 9
+	Float32Kind // 10
+	Float64Kind // 11
+	StringKind  // 12
+	BlobKind    // 13
+	ValueKind   // 14
+	ListKind    // 15
+	MapKind     // 16
+	RefKind     // 17
+	SetKind     // 18
+	EnumKind    // 19
+	StructKind  // 20
 	TypeRefKind
 )
 

@@ -1,0 +1,19 @@
+struct A1 {
+  x: Int16
+  s: String
+  b: Bool
+}
+
+struct A2 {
+  x: Float32
+  union {
+    b: Bool
+    s: String
+  }
+}
+
+struct A3 {
+  x: Float32
+  s: optional String
+  b: optional Bool
+}
