@@ -12,16 +12,16 @@ var __decodePackageInFile_types_CachedRef = __decodePackageInFile_types_Ref()
 // This function builds up a Noms value that describes the type
 // package implemented by this file and registers it with the global
 // type package definition cache.
-func __decodePackageInFile_types_Ref() types.Ref {
+func __decodePackageInFile_types_Ref() ref.Ref {
 	p := types.PackageDef{
-		Types: types.MapOfStringToTypeRefDef{
+		NamedTypes: types.MapOfStringToTypeRefDef{
 
 			"A1": __typeRefOfA1(),
 			"A2": __typeRefOfA2(),
 			"A3": __typeRefOfA3(),
 		},
 	}.New()
-	return types.Ref{R: types.RegisterPackage(&p)}
+	return types.RegisterPackage(&p)
 }
 
 // A1

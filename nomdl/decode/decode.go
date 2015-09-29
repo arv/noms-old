@@ -74,7 +74,7 @@ func (r *jsonArrayReader) readTypeRef() types.TypeRef {
 		pkg := r.readPackage(nil)
 		name := r.readString()
 		// TODO: This is wrong. Package uses name to TypeRef
-		return pkg.Types().Get(name)
+		return pkg.NamedTypes().Get(name)
 	}
 	panic("unreachable")
 }

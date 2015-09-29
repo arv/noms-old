@@ -132,7 +132,7 @@ func TestReadValueSetOfUInt16(t *testing.T) {
 func TestReadStruct(t *testing.T) {
 	assert := assert.New(t)
 
-	ref := __decodePackageInFile_types_CachedRef.Ref()
+	ref := __decodePackageInFile_types_CachedRef
 	// TODO: Should use ordinal of type and not name
 	a := parseJson(fmt.Sprintf(`[%d, "%s", "A1", 42, "hi", true]`, types.StructKind, ref.String()))
 	r := newJsonArrayReader(a)
@@ -148,7 +148,7 @@ func TestReadStruct(t *testing.T) {
 func TestReadStructUnion(t *testing.T) {
 	assert := assert.New(t)
 
-	ref := __decodePackageInFile_types_CachedRef.Ref()
+	ref := __decodePackageInFile_types_CachedRef
 	// TODO: Should use ordinal of type and not name
 	a := parseJson(fmt.Sprintf(`[%d, "%s", "A2", 42, 1, "hi"]`, types.StructKind, ref.String()))
 	r := newJsonArrayReader(a)
@@ -168,7 +168,7 @@ func TestReadStructUnion(t *testing.T) {
 func TestReadStructOptional(t *testing.T) {
 	assert := assert.New(t)
 
-	ref := __decodePackageInFile_types_CachedRef.Ref()
+	ref := __decodePackageInFile_types_CachedRef
 	// TODO: Should use ordinal of type and not name
 	a := parseJson(fmt.Sprintf(`[%d, "%s", "A3", 42, 0, 0, 1, false]`, types.StructKind, ref.String()))
 	r := newJsonArrayReader(a)
@@ -188,7 +188,7 @@ func TestReadStructOptional(t *testing.T) {
 func TestReadValueStruct(t *testing.T) {
 	assert := assert.New(t)
 
-	ref := __decodePackageInFile_types_CachedRef.Ref()
+	ref := __decodePackageInFile_types_CachedRef
 	// TODO: Should use ordinal of type and not name
 	a := parseJson(fmt.Sprintf(`[%d, %d, "%s", "A1", 42, "hi", true]`, types.ValueKind, types.StructKind, ref.String()))
 	r := newJsonArrayReader(a)

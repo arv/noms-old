@@ -2,6 +2,7 @@ package encode
 
 import (
 	"github.com/attic-labs/noms/d"
+	"github.com/attic-labs/noms/ref"
 	"github.com/attic-labs/noms/types"
 )
 
@@ -19,8 +20,8 @@ func (w *jsonArrayWriter) toSlice() []interface{} {
 	return *w
 }
 
-func (w *jsonArrayWriter) writeRef(r types.Ref) {
-	w.write(r.Ref().String())
+func (w *jsonArrayWriter) writeRef(r ref.Ref) {
+	w.write(r.String())
 }
 
 func (w *jsonArrayWriter) writeTypeRef(t types.TypeRef) {
