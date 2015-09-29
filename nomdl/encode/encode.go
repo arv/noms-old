@@ -70,8 +70,9 @@ func (w *jsonArrayWriter) writeValue(t types.TypeRef, v types.Value) {
 		panic("not yet implemented")
 	case types.ValueKind:
 		// The value is always tagged
-		w.writeTypeRef(t)
-		panic("not yet implemented")
+		runtimeType := getTypeRefFromValue(v)
+		w.writeTypeRef(runtimeType)
+		w.writeValue(runtimeType, v)
 	case types.ListKind:
 		w2 := newJsonArrayWriter()
 		w2.writeList(t, v.(types.List))
@@ -148,4 +149,49 @@ func (w *jsonArrayWriter) writeStruct(t types.TypeRef, m types.Map) {
 
 func (w *jsonArrayWriter) writeEnum(t types.TypeRef, v types.UInt32) {
 	w.write(uint32(v))
+}
+
+func getTypeRefFromValue(v types.Value) types.TypeRef {
+	switch v := v.(type) {
+	case types.Bool:
+		return types.MakePrimitiveTypeRef(types.BoolKind)
+	case types.UInt8:
+		return types.MakePrimitiveTypeRef(types.UInt8Kind)
+	case types.UInt16:
+		return types.MakePrimitiveTypeRef(types.UInt16Kind)
+	case types.UInt32:
+		return types.MakePrimitiveTypeRef(types.UInt32Kind)
+	case types.UInt64:
+		return types.MakePrimitiveTypeRef(types.UInt64Kind)
+	case types.Int8:
+		return types.MakePrimitiveTypeRef(types.Int8Kind)
+	case types.Int16:
+		return types.MakePrimitiveTypeRef(types.Int16Kind)
+	case types.Int32:
+		return types.MakePrimitiveTypeRef(types.Int32Kind)
+	case types.Int64:
+		return types.MakePrimitiveTypeRef(types.Int64Kind)
+	case types.Float32:
+		return types.MakePrimitiveTypeRef(types.Float32Kind)
+	case types.Float64:
+		return types.MakePrimitiveTypeRef(types.Float64Kind)
+	case types.String:
+		return types.MakePrimitiveTypeRef(types.StringKind)
+	case types.Blob:
+		return types.MakePrimitiveTypeRef(types.BlobKind)
+	case types.List:
+		panic("not yet implemented")
+	case types.Map:
+		if t, ok := v.MaybeGet(types.NewString("$type")); ok {
+			return t.(types.TypeRef)
+		}
+		panic("not yet implemented")
+	case types.Ref:
+		panic("not yet implemented")
+	case types.Set:
+		panic("not yet implemented")
+	case types.TypeRef:
+		panic("not yet implemented")
+	}
+	panic("unreachable")
 }

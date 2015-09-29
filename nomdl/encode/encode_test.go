@@ -267,3 +267,56 @@ func TestWriteListOfEnum(t *testing.T) {
 	ref := ref.Ref{}
 	assert.EqualValues([]interface{}{types.ListKind, types.EnumKind, ref.String(), "E", uint32(0), uint32(1), uint32(2)}, *w)
 }
+
+func TestWriteListOfValue(t *testing.T) {
+	assert := assert.New(t)
+
+	tref := types.MakeCompoundTypeRef("", types.ListKind, types.MakePrimitiveTypeRef(types.ValueKind))
+	v := types.NewList(
+		types.Bool(true),
+		types.UInt8(1),
+		types.UInt16(1),
+		types.UInt32(1),
+		types.UInt64(1),
+		types.Int8(1),
+		types.Int16(1),
+		types.Int32(1),
+		types.Int64(1),
+		types.Float32(1),
+		types.Float64(1),
+		types.NewString("hi"),
+	)
+
+	w := newJsonArrayWriter()
+	w.writeTypeRef(tref)
+	w.writeList(tref, v)
+	assert.EqualValues([]interface{}{types.ListKind, types.ValueKind,
+		types.BoolKind, true,
+		types.UInt8Kind, uint8(1),
+		types.UInt16Kind, uint16(1),
+		types.UInt32Kind, uint32(1),
+		types.UInt64Kind, uint64(1),
+		types.Int8Kind, int8(1),
+		types.Int16Kind, int16(1),
+		types.Int32Kind, int32(1),
+		types.Int64Kind, int64(1),
+		types.Float32Kind, float32(1),
+		types.Float64Kind, float64(1),
+		types.StringKind, "hi",
+	}, *w)
+}
+
+func TestWriteListOfValueWithStruct(t *testing.T) {
+	assert := assert.New(t)
+	tref := types.MakeCompoundTypeRef("", types.ListKind, types.MakePrimitiveTypeRef(types.ValueKind))
+	st := types.MakeStructTypeRef("S", []types.Field{
+		types.Field{"x", types.MakePrimitiveTypeRef(types.Int32Kind), false},
+	}, types.Choices{})
+	v := types.NewList(types.NewMap(types.NewString("$type"), st, types.NewString("x"), types.Int32(42)))
+
+	w := newJsonArrayWriter()
+	w.writeTypeRef(tref)
+	w.writeList(tref, v)
+	ref := ref.Ref{}
+	assert.EqualValues([]interface{}{types.ListKind, types.ValueKind, types.StructKind, ref.String(), "S", int32(42)}, *w)
+}
