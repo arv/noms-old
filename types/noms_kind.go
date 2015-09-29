@@ -12,20 +12,20 @@ const (
 	UInt64Kind
 	Int8Kind
 	Int16Kind
-	Int32Kind   // 8
-	Int64Kind   // 9
-	Float32Kind // 10
-	Float64Kind // 11
-	StringKind  // 12
-	BlobKind    // 13
-	ValueKind   // 14
-	ListKind    // 15
-	MapKind     // 16
-	RefKind     // 17
-	SetKind     // 18
-	EnumKind    // 19
-	StructKind  // 20
-	TypeRefKind
+	Int32Kind
+	Int64Kind   // 8
+	Float32Kind // 9
+	Float64Kind // 10
+	StringKind  // 11
+	BlobKind    // 12
+	ValueKind   // 13
+	ListKind    // 14
+	MapKind     // 15
+	RefKind     // 16
+	SetKind     // 17
+	EnumKind    // 18
+	StructKind  // 19
+	TypeRefKind // 20
 )
 
 func IsPrimitiveKind(k NomsKind) bool {
