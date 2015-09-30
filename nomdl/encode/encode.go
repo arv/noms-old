@@ -16,7 +16,7 @@ func (w *jsonArrayWriter) write(v interface{}) {
 	*w = append(*w, v)
 }
 
-func (w *jsonArrayWriter) toSlice() []interface{} {
+func (w *jsonArrayWriter) toArray() []interface{} {
 	return *w
 }
 
@@ -57,10 +57,21 @@ func (w *jsonArrayWriter) writeNomsValue(nv nomsValue) {
 	v := nv.NomsValue()
 	t := nv.TypeRef()
 	w.writeTypeRef(t)
-	w.writeValue(t, v)
+	w.writeTopLevelValue(t, v)
 }
 
 func (w *jsonArrayWriter) writeValue(t types.TypeRef, v encodeableValue) {
+	switch t.Kind() {
+	case types.ListKind, types.MapKind, types.SetKind:
+		w2 := newJsonArrayWriter()
+		w2.writeTopLevelValue(t, v)
+		w.write(w2.toArray())
+	default:
+		w.writeTopLevelValue(t, v)
+	}
+}
+
+func (w *jsonArrayWriter) writeTopLevelValue(t types.TypeRef, v encodeableValue) {
 	switch t.Kind() {
 	case types.BoolKind, types.Float32Kind, types.Float64Kind, types.Int16Kind, types.Int32Kind, types.Int64Kind, types.Int8Kind, types.UInt16Kind, types.UInt32Kind, types.UInt64Kind, types.UInt8Kind:
 		w.write(v.(primitive).ToPrimitive())
@@ -74,19 +85,13 @@ func (w *jsonArrayWriter) writeValue(t types.TypeRef, v encodeableValue) {
 		w.writeTypeRef(runtimeType)
 		w.writeValue(runtimeType, v)
 	case types.ListKind:
-		w2 := newJsonArrayWriter()
-		w2.writeList(t, v.(types.List))
-		w.write(w2.toSlice())
+		w.writeList(t, v.(types.List))
 	case types.MapKind:
-		w2 := newJsonArrayWriter()
-		w2.writeMap(t, v.(types.Map))
-		w.write(w2.toSlice())
+		w.writeMap(t, v.(types.Map))
 	case types.RefKind:
 		panic("not yet implemented")
 	case types.SetKind:
-		w2 := newJsonArrayWriter()
-		w2.writeSet(t, v.(types.Set))
-		w.write(w2.toSlice())
+		w.writeSet(t, v.(types.Set))
 	case types.EnumKind:
 		w.writeEnum(t, v.(types.UInt32))
 	case types.StructKind:
