@@ -17,3 +17,9 @@ struct A3 {
   s: optional String
   b: optional Bool
 }
+
+enum E {
+  a
+  b
+  c
+}

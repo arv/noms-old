@@ -200,3 +200,29 @@ func TestReadValueStruct(t *testing.T) {
 	assert.Equal(true, s.B())
 	assert.Equal("hi", s.S())
 }
+
+func TestReadEnum(t *testing.T) {
+	assert := assert.New(t)
+
+	ref := __decodePackageInFile_types_CachedRef
+	// TODO: Should use ordinal of type and not name
+	a := parseJson(fmt.Sprintf(`[%d, "%s", "E", 1]`, types.EnumKind, ref.String()))
+	r := newJsonArrayReader(a)
+	tr := r.readTypeRef()
+	assert.Equal(types.EnumKind, tr.Kind())
+	v := r.readEnum(tr)
+	assert.Equal(uint32(1), uint32(v.(types.UInt32)))
+}
+
+func TestReadValueEnum(t *testing.T) {
+	assert := assert.New(t)
+
+	ref := __decodePackageInFile_types_CachedRef
+	// TODO: Should use ordinal of type and not name
+	a := parseJson(fmt.Sprintf(`[%d, %d, "%s", "E", 1]`, types.ValueKind, types.EnumKind, ref.String()))
+	r := newJsonArrayReader(a)
+	tr := r.readTypeRef()
+	assert.Equal(types.ValueKind, tr.Kind())
+	v := r.readValue(tr)
+	assert.Equal(uint32(1), uint32(v.(types.UInt32)))
+}

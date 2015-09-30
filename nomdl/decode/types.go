@@ -19,6 +19,7 @@ func __decodePackageInFile_types_Ref() ref.Ref {
 			"A1": __typeRefOfA1(),
 			"A2": __typeRefOfA2(),
 			"A3": __typeRefOfA3(),
+			"E":  __typeRefOfE(),
 		},
 	}.New()
 	return types.RegisterPackage(&p)
@@ -376,4 +377,22 @@ func (s A3) B() (v bool, ok bool) {
 
 func (s A3) SetB(val bool) A3 {
 	return A3{s.m.Set(types.NewString("b"), types.Bool(val))}
+}
+
+// E
+
+type E uint32
+
+const (
+	A E = iota
+	B
+	C
+)
+
+// Creates and returns a Noms Value that describes E.
+func __typeRefOfE() types.TypeRef {
+	return types.MakeEnumTypeRef("E", "a",
+		"b",
+		"c",
+	)
 }

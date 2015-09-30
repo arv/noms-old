@@ -144,6 +144,10 @@ func (r *jsonArrayReader) readStruct(t types.TypeRef) types.Map {
 	return m
 }
 
+func (r *jsonArrayReader) readEnum(types.TypeRef) types.Value {
+	return types.UInt32(r.read().(float64))
+}
+
 func (r *jsonArrayReader) readValue(t types.TypeRef) types.Value {
 	switch t.Kind() {
 	case types.BoolKind:
@@ -191,7 +195,7 @@ func (r *jsonArrayReader) readValue(t types.TypeRef) types.Value {
 		r2 := newJsonArrayReader(a)
 		return r2.readSet(t)
 	case types.EnumKind:
-		panic("not implemented")
+		return r.readEnum(t)
 	case types.StructKind:
 		return r.readStruct(t)
 	case types.TypeRefKind:
