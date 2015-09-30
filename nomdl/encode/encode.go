@@ -40,30 +40,30 @@ func (w *jsonArrayWriter) writeTypeRef(t types.TypeRef) {
 	}
 }
 
-func (w *jsonArrayWriter) writeValue(t types.TypeRef, v types.Value) {
+type encodeableValue interface {
+	TypeRef() types.TypeRef
+}
+
+type primitive interface {
+	ToPrimitive() interface{}
+}
+
+type nomsValue interface {
+	TypeRef() types.TypeRef
+	NomsValue() types.Value
+}
+
+func (w *jsonArrayWriter) writeNomsValue(nv nomsValue) {
+	v := nv.NomsValue()
+	t := nv.TypeRef()
+	w.writeTypeRef(t)
+	w.writeValue(t, v)
+}
+
+func (w *jsonArrayWriter) writeValue(t types.TypeRef, v encodeableValue) {
 	switch t.Kind() {
-	case types.BoolKind:
-		w.write(bool(v.(types.Bool)))
-	case types.UInt8Kind:
-		w.write(uint8(v.(types.UInt8)))
-	case types.UInt16Kind:
-		w.write(uint16(v.(types.UInt16)))
-	case types.UInt32Kind:
-		w.write(uint32(v.(types.UInt32)))
-	case types.UInt64Kind:
-		w.write(uint64(v.(types.UInt64)))
-	case types.Int8Kind:
-		w.write(int8(v.(types.Int8)))
-	case types.Int16Kind:
-		w.write(int16(v.(types.Int16)))
-	case types.Int32Kind:
-		w.write(int32(v.(types.Int32)))
-	case types.Int64Kind:
-		w.write(int64(v.(types.Int64)))
-	case types.Float32Kind:
-		w.write(float32(v.(types.Float32)))
-	case types.Float64Kind:
-		w.write(float64(v.(types.Float64)))
+	case types.BoolKind, types.Float32Kind, types.Float64Kind, types.Int16Kind, types.Int32Kind, types.Int64Kind, types.Int8Kind, types.UInt16Kind, types.UInt32Kind, types.UInt64Kind, types.UInt8Kind:
+		w.write(v.(primitive).ToPrimitive())
 	case types.StringKind:
 		w.write(v.(types.String).String())
 	case types.BlobKind:

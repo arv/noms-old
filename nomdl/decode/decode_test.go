@@ -185,6 +185,38 @@ func TestReadStructOptional(t *testing.T) {
 	assert.Equal(false, b)
 }
 
+func TestReadStructWithList(t *testing.T) {
+	assert := assert.New(t)
+
+	ref := __decodePackageInFile_types_CachedRef
+	// TODO: Should use ordinal of type and not name
+	a := parseJson(fmt.Sprintf(`[%d, "%s", "A4", true, [0, 1, 2], "hi"]`, types.StructKind, ref.String()))
+	r := newJsonArrayReader(a)
+	tr := r.readTypeRef()
+	assert.Equal(types.StructKind, tr.Kind())
+	v := r.readStruct(tr)
+
+	// TODO: Package ref are currently not propagated in the parser.
+	s := A4FromVal(v)
+	assert.Equal(s.Def(), A4Def{true, []int32{0, 1, 2}, "hi"})
+}
+
+func TestReadStructWithValue(t *testing.T) {
+	assert := assert.New(t)
+
+	ref := __decodePackageInFile_types_CachedRef
+	// TODO: Should use ordinal of type and not name
+	a := parseJson(fmt.Sprintf(`[%d, "%s", "A5", true, %d, 42, "hi"]`, types.StructKind, ref.String(), types.UInt8Kind))
+	r := newJsonArrayReader(a)
+	tr := r.readTypeRef()
+	assert.Equal(types.StructKind, tr.Kind())
+	v := r.readStruct(tr)
+
+	// TODO: Package ref are currently not propagated in the parser.
+	s := A5FromVal(v)
+	assert.Equal(s.Def(), A5Def{true, types.UInt8(42), "hi"})
+}
+
 func TestReadValueStruct(t *testing.T) {
 	assert := assert.New(t)
 

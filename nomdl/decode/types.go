@@ -16,10 +16,12 @@ func __decodePackageInFile_types_Ref() ref.Ref {
 	p := types.PackageDef{
 		NamedTypes: types.MapOfStringToTypeRefDef{
 
-			"A1": __typeRefOfA1(),
-			"A2": __typeRefOfA2(),
-			"A3": __typeRefOfA3(),
-			"E":  __typeRefOfE(),
+			"A1": __typeRefForA1,
+			"A2": __typeRefForA2,
+			"A3": __typeRefForA3,
+			"A4": __typeRefForA4,
+			"A5": __typeRefForA5,
+			"E":  __typeRefForE,
 		},
 	}.New()
 	return types.RegisterPackage(&p)
@@ -65,16 +67,18 @@ func (s A1) Def() (d A1Def) {
 	return
 }
 
-// Creates and returns a Noms Value that describes A1.
-func __typeRefOfA1() types.TypeRef {
-	return types.MakeStructTypeRef("A1",
-		[]types.Field{
-			types.Field{"x", types.MakePrimitiveTypeRef(types.Int16Kind), false},
-			types.Field{"s", types.MakePrimitiveTypeRef(types.StringKind), false},
-			types.Field{"b", types.MakePrimitiveTypeRef(types.BoolKind), false},
-		},
-		types.Choices{},
-	)
+// A Noms Value that describes A1.
+var __typeRefForA1 = types.MakeStructTypeRef("A1",
+	[]types.Field{
+		types.Field{"x", types.MakePrimitiveTypeRef(types.Int16Kind), false},
+		types.Field{"s", types.MakePrimitiveTypeRef(types.StringKind), false},
+		types.Field{"b", types.MakePrimitiveTypeRef(types.BoolKind), false},
+	},
+	types.Choices{},
+)
+
+func (m A1) TypeRef() types.TypeRef {
+	return __typeRefForA1
 }
 
 func A1FromVal(val types.Value) A1 {
@@ -182,17 +186,19 @@ func (s A2) __unionValueToDef() interface{} {
 	panic("unreachable")
 }
 
-// Creates and returns a Noms Value that describes A2.
-func __typeRefOfA2() types.TypeRef {
-	return types.MakeStructTypeRef("A2",
-		[]types.Field{
-			types.Field{"x", types.MakePrimitiveTypeRef(types.Float32Kind), false},
-		},
-		types.Choices{
-			types.Field{"b", types.MakePrimitiveTypeRef(types.BoolKind), false},
-			types.Field{"s", types.MakePrimitiveTypeRef(types.StringKind), false},
-		},
-	)
+// A Noms Value that describes A2.
+var __typeRefForA2 = types.MakeStructTypeRef("A2",
+	[]types.Field{
+		types.Field{"x", types.MakePrimitiveTypeRef(types.Float32Kind), false},
+	},
+	types.Choices{
+		types.Field{"b", types.MakePrimitiveTypeRef(types.BoolKind), false},
+		types.Field{"s", types.MakePrimitiveTypeRef(types.StringKind), false},
+	},
+)
+
+func (m A2) TypeRef() types.TypeRef {
+	return __typeRefForA2
 }
 
 func A2FromVal(val types.Value) A2 {
@@ -314,16 +320,18 @@ func (s A3) Def() (d A3Def) {
 	return
 }
 
-// Creates and returns a Noms Value that describes A3.
-func __typeRefOfA3() types.TypeRef {
-	return types.MakeStructTypeRef("A3",
-		[]types.Field{
-			types.Field{"x", types.MakePrimitiveTypeRef(types.Float32Kind), false},
-			types.Field{"s", types.MakePrimitiveTypeRef(types.StringKind), true},
-			types.Field{"b", types.MakePrimitiveTypeRef(types.BoolKind), true},
-		},
-		types.Choices{},
-	)
+// A Noms Value that describes A3.
+var __typeRefForA3 = types.MakeStructTypeRef("A3",
+	[]types.Field{
+		types.Field{"x", types.MakePrimitiveTypeRef(types.Float32Kind), false},
+		types.Field{"s", types.MakePrimitiveTypeRef(types.StringKind), true},
+		types.Field{"b", types.MakePrimitiveTypeRef(types.BoolKind), true},
+	},
+	types.Choices{},
+)
+
+func (m A3) TypeRef() types.TypeRef {
+	return __typeRefForA3
 }
 
 func A3FromVal(val types.Value) A3 {
@@ -379,6 +387,328 @@ func (s A3) SetB(val bool) A3 {
 	return A3{s.m.Set(types.NewString("b"), types.Bool(val))}
 }
 
+// A4
+
+type A4 struct {
+	m types.Map
+}
+
+func NewA4() A4 {
+	return A4{types.NewMap(
+		types.NewString("$name"), types.NewString("A4"),
+		types.NewString("$type"), types.MakeTypeRef("A4", __decodePackageInFile_types_CachedRef),
+		types.NewString("x"), types.Bool(false),
+		types.NewString("l"), types.NewList(),
+		types.NewString("s"), types.NewString(""),
+	)}
+}
+
+type A4Def struct {
+	X bool
+	L ListOfInt32Def
+	S string
+}
+
+func (def A4Def) New() A4 {
+	return A4{
+		types.NewMap(
+			types.NewString("$name"), types.NewString("A4"),
+			types.NewString("$type"), types.MakeTypeRef("A4", __decodePackageInFile_types_CachedRef),
+			types.NewString("x"), types.Bool(def.X),
+			types.NewString("l"), def.L.New().NomsValue(),
+			types.NewString("s"), types.NewString(def.S),
+		)}
+}
+
+func (s A4) Def() (d A4Def) {
+	d.X = bool(s.m.Get(types.NewString("x")).(types.Bool))
+	d.L = ListOfInt32FromVal(s.m.Get(types.NewString("l"))).Def()
+	d.S = s.m.Get(types.NewString("s")).(types.String).String()
+	return
+}
+
+// A Noms Value that describes A4.
+var __typeRefForA4 = types.MakeStructTypeRef("A4",
+	[]types.Field{
+		types.Field{"x", types.MakePrimitiveTypeRef(types.BoolKind), false},
+		types.Field{"l", types.MakeCompoundTypeRef("", types.ListKind, types.MakePrimitiveTypeRef(types.Int32Kind)), false},
+		types.Field{"s", types.MakePrimitiveTypeRef(types.StringKind), false},
+	},
+	types.Choices{},
+)
+
+func (m A4) TypeRef() types.TypeRef {
+	return __typeRefForA4
+}
+
+func A4FromVal(val types.Value) A4 {
+	// TODO: Validate here
+	return A4{val.(types.Map)}
+}
+
+func (s A4) NomsValue() types.Value {
+	return s.m
+}
+
+func (s A4) Equals(other A4) bool {
+	return s.m.Equals(other.m)
+}
+
+func (s A4) Ref() ref.Ref {
+	return s.m.Ref()
+}
+
+func (s A4) Type() types.TypeRef {
+	return s.m.Get(types.NewString("$type")).(types.TypeRef)
+}
+
+func (s A4) X() bool {
+	return bool(s.m.Get(types.NewString("x")).(types.Bool))
+}
+
+func (s A4) SetX(val bool) A4 {
+	return A4{s.m.Set(types.NewString("x"), types.Bool(val))}
+}
+
+func (s A4) L() ListOfInt32 {
+	return ListOfInt32FromVal(s.m.Get(types.NewString("l")))
+}
+
+func (s A4) SetL(val ListOfInt32) A4 {
+	return A4{s.m.Set(types.NewString("l"), val.NomsValue())}
+}
+
+func (s A4) S() string {
+	return s.m.Get(types.NewString("s")).(types.String).String()
+}
+
+func (s A4) SetS(val string) A4 {
+	return A4{s.m.Set(types.NewString("s"), types.NewString(val))}
+}
+
+// ListOfInt32
+
+type ListOfInt32 struct {
+	l types.List
+}
+
+func NewListOfInt32() ListOfInt32 {
+	return ListOfInt32{types.NewList()}
+}
+
+type ListOfInt32Def []int32
+
+func (def ListOfInt32Def) New() ListOfInt32 {
+	l := make([]types.Value, len(def))
+	for i, d := range def {
+		l[i] = types.Int32(d)
+	}
+	return ListOfInt32{types.NewList(l...)}
+}
+
+func (l ListOfInt32) Def() ListOfInt32Def {
+	d := make([]int32, l.Len())
+	for i := uint64(0); i < l.Len(); i++ {
+		d[i] = int32(l.l.Get(i).(types.Int32))
+	}
+	return d
+}
+
+func ListOfInt32FromVal(val types.Value) ListOfInt32 {
+	// TODO: Validate here
+	return ListOfInt32{val.(types.List)}
+}
+
+func (l ListOfInt32) NomsValue() types.Value {
+	return l.l
+}
+
+func (l ListOfInt32) Equals(p ListOfInt32) bool {
+	return l.l.Equals(p.l)
+}
+
+func (l ListOfInt32) Ref() ref.Ref {
+	return l.l.Ref()
+}
+
+// A Noms Value that describes ListOfInt32.
+var __typeRefForListOfInt32 = types.MakeCompoundTypeRef("", types.ListKind, types.MakePrimitiveTypeRef(types.Int32Kind))
+
+func (m ListOfInt32) TypeRef() types.TypeRef {
+	return __typeRefForListOfInt32
+}
+
+func (l ListOfInt32) Len() uint64 {
+	return l.l.Len()
+}
+
+func (l ListOfInt32) Empty() bool {
+	return l.Len() == uint64(0)
+}
+
+func (l ListOfInt32) Get(i uint64) int32 {
+	return int32(l.l.Get(i).(types.Int32))
+}
+
+func (l ListOfInt32) Slice(idx uint64, end uint64) ListOfInt32 {
+	return ListOfInt32{l.l.Slice(idx, end)}
+}
+
+func (l ListOfInt32) Set(i uint64, val int32) ListOfInt32 {
+	return ListOfInt32{l.l.Set(i, types.Int32(val))}
+}
+
+func (l ListOfInt32) Append(v ...int32) ListOfInt32 {
+	return ListOfInt32{l.l.Append(l.fromElemSlice(v)...)}
+}
+
+func (l ListOfInt32) Insert(idx uint64, v ...int32) ListOfInt32 {
+	return ListOfInt32{l.l.Insert(idx, l.fromElemSlice(v)...)}
+}
+
+func (l ListOfInt32) Remove(idx uint64, end uint64) ListOfInt32 {
+	return ListOfInt32{l.l.Remove(idx, end)}
+}
+
+func (l ListOfInt32) RemoveAt(idx uint64) ListOfInt32 {
+	return ListOfInt32{(l.l.RemoveAt(idx))}
+}
+
+func (l ListOfInt32) fromElemSlice(p []int32) []types.Value {
+	r := make([]types.Value, len(p))
+	for i, v := range p {
+		r[i] = types.Int32(v)
+	}
+	return r
+}
+
+type ListOfInt32IterCallback func(v int32, i uint64) (stop bool)
+
+func (l ListOfInt32) Iter(cb ListOfInt32IterCallback) {
+	l.l.Iter(func(v types.Value, i uint64) bool {
+		return cb(int32(v.(types.Int32)), i)
+	})
+}
+
+type ListOfInt32IterAllCallback func(v int32, i uint64)
+
+func (l ListOfInt32) IterAll(cb ListOfInt32IterAllCallback) {
+	l.l.IterAll(func(v types.Value, i uint64) {
+		cb(int32(v.(types.Int32)), i)
+	})
+}
+
+type ListOfInt32FilterCallback func(v int32, i uint64) (keep bool)
+
+func (l ListOfInt32) Filter(cb ListOfInt32FilterCallback) ListOfInt32 {
+	nl := NewListOfInt32()
+	l.IterAll(func(v int32, i uint64) {
+		if cb(v, i) {
+			nl = nl.Append(v)
+		}
+	})
+	return nl
+}
+
+// A5
+
+type A5 struct {
+	m types.Map
+}
+
+func NewA5() A5 {
+	return A5{types.NewMap(
+		types.NewString("$name"), types.NewString("A5"),
+		types.NewString("$type"), types.MakeTypeRef("A5", __decodePackageInFile_types_CachedRef),
+		types.NewString("x"), types.Bool(false),
+		types.NewString("v"), types.Bool(false),
+		types.NewString("s"), types.NewString(""),
+	)}
+}
+
+type A5Def struct {
+	X bool
+	V types.Value
+	S string
+}
+
+func (def A5Def) New() A5 {
+	return A5{
+		types.NewMap(
+			types.NewString("$name"), types.NewString("A5"),
+			types.NewString("$type"), types.MakeTypeRef("A5", __decodePackageInFile_types_CachedRef),
+			types.NewString("x"), types.Bool(def.X),
+			types.NewString("v"), def.V,
+			types.NewString("s"), types.NewString(def.S),
+		)}
+}
+
+func (s A5) Def() (d A5Def) {
+	d.X = bool(s.m.Get(types.NewString("x")).(types.Bool))
+	d.V = s.m.Get(types.NewString("v"))
+	d.S = s.m.Get(types.NewString("s")).(types.String).String()
+	return
+}
+
+// A Noms Value that describes A5.
+var __typeRefForA5 = types.MakeStructTypeRef("A5",
+	[]types.Field{
+		types.Field{"x", types.MakePrimitiveTypeRef(types.BoolKind), false},
+		types.Field{"v", types.MakePrimitiveTypeRef(types.ValueKind), false},
+		types.Field{"s", types.MakePrimitiveTypeRef(types.StringKind), false},
+	},
+	types.Choices{},
+)
+
+func (m A5) TypeRef() types.TypeRef {
+	return __typeRefForA5
+}
+
+func A5FromVal(val types.Value) A5 {
+	// TODO: Validate here
+	return A5{val.(types.Map)}
+}
+
+func (s A5) NomsValue() types.Value {
+	return s.m
+}
+
+func (s A5) Equals(other A5) bool {
+	return s.m.Equals(other.m)
+}
+
+func (s A5) Ref() ref.Ref {
+	return s.m.Ref()
+}
+
+func (s A5) Type() types.TypeRef {
+	return s.m.Get(types.NewString("$type")).(types.TypeRef)
+}
+
+func (s A5) X() bool {
+	return bool(s.m.Get(types.NewString("x")).(types.Bool))
+}
+
+func (s A5) SetX(val bool) A5 {
+	return A5{s.m.Set(types.NewString("x"), types.Bool(val))}
+}
+
+func (s A5) V() types.Value {
+	return s.m.Get(types.NewString("v"))
+}
+
+func (s A5) SetV(val types.Value) A5 {
+	return A5{s.m.Set(types.NewString("v"), val)}
+}
+
+func (s A5) S() string {
+	return s.m.Get(types.NewString("s")).(types.String).String()
+}
+
+func (s A5) SetS(val string) A5 {
+	return A5{s.m.Set(types.NewString("s"), types.NewString(val))}
+}
+
 // E
 
 type E uint32
@@ -389,10 +719,5 @@ const (
 	C
 )
 
-// Creates and returns a Noms Value that describes E.
-func __typeRefOfE() types.TypeRef {
-	return types.MakeEnumTypeRef("E", "a",
-		"b",
-		"c",
-	)
-}
+// A Noms Value that describes E.
+var __typeRefForE = types.MakeEnumTypeRef("E", "a", "b", "c")

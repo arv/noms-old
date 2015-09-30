@@ -320,3 +320,12 @@ func TestWriteListOfValueWithStruct(t *testing.T) {
 	ref := ref.Ref{}
 	assert.EqualValues([]interface{}{types.ListKind, types.ValueKind, types.StructKind, ref.String(), "S", int32(42)}, *w)
 }
+
+func TestWriteNomsList(t *testing.T) {
+	assert := assert.New(t)
+
+	l := ListOfBoolDef{true, false, true}.New()
+	w := newJsonArrayWriter()
+	w.writeNomsValue(l)
+	assert.EqualValues([]interface{}{types.ListKind, types.BoolKind, true, false, true}, *w)
+}

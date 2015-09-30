@@ -18,6 +18,18 @@ struct A3 {
   b: optional Bool
 }
 
+struct A4 {
+  x: Bool
+  l: List(Int32)
+  s: String
+}
+
+struct A5 {
+  x: Bool
+  v: Value
+  s: String
+}
+
 enum E {
   a
   b
