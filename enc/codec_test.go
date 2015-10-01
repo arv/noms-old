@@ -9,6 +9,14 @@ import (
 	"github.com/attic-labs/noms/d"
 )
 
+type testTypedValue struct {
+	v interface{}
+}
+
+func (t testTypedValue) TypedValue() interface{} {
+	return t.v
+}
+
 func TestEncode(t *testing.T) {
 	assert := assert.New(t)
 
@@ -21,6 +29,10 @@ func TestEncode(t *testing.T) {
 	dst.Reset()
 	Encode(dst, "foo")
 	assert.Equal("j \"foo\"\n", string(dst.Bytes()))
+
+	dst.Reset()
+	Encode(dst, testTypedValue{[]interface{}{42}})
+	assert.Equal("t [42]\n", string(dst.Bytes()))
 }
 
 func TestInvalidDecode(t *testing.T) {
@@ -50,4 +62,9 @@ func TestSelectBlobDecoder(t *testing.T) {
 	_, err := io.Copy(out, decoded.(io.Reader))
 	assert.NoError(err)
 	assert.EqualValues([]byte{0x2B}, out.Bytes())
+}
+
+func TestSelectTypedDecoder(t *testing.T) {
+	v := Decode(bytes.NewBufferString(`t [42]`))
+	assert.Equal(t, []interface{}{float64(42)}, v)
 }
