@@ -167,14 +167,14 @@ func TestWriteStructOptionalField(t *testing.T) {
 	w.writeTypeRef(tref)
 	w.writeStruct(tref, v)
 	ref := ref.Ref{}
-	assert.EqualValues([]interface{}{types.StructKind, ref.String(), "S", uint32(1), int8(42), true}, *w)
+	assert.EqualValues([]interface{}{types.StructKind, ref.String(), "S", true, int8(42), true}, *w)
 
 	v = types.NewMap(types.NewString("b"), types.Bool(true))
 
 	w = newJsonArrayWriter()
 	w.writeTypeRef(tref)
 	w.writeStruct(tref, v)
-	assert.EqualValues([]interface{}{types.StructKind, ref.String(), "S", uint32(0), uint32(0), true}, *w)
+	assert.EqualValues([]interface{}{types.StructKind, ref.String(), "S", false, true}, *w)
 }
 
 func TestWriteStructWithUnion(t *testing.T) {

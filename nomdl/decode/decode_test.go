@@ -170,7 +170,7 @@ func TestReadStructOptional(t *testing.T) {
 
 	ref := __decodePackageInFile_types_CachedRef
 	// TODO: Should use ordinal of type and not name
-	a := parseJson(fmt.Sprintf(`[%d, "%s", "A3", 42, 0, 0, 1, false]`, types.StructKind, ref.String()))
+	a := parseJson(fmt.Sprintf(`[%d, "%s", "A3", 42, 0, 1, false]`, types.StructKind, ref.String()))
 	r := newJsonArrayReader(a)
 	tr := r.readTypeRef()
 	assert.Equal(types.StructKind, tr.Kind())

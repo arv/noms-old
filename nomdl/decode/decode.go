@@ -123,9 +123,7 @@ func (r *jsonArrayReader) readStruct(t types.TypeRef) types.Map {
 	for _, f := range desc.Fields {
 		if f.Optional {
 			p := r.read().(float64)
-			if p == 0 {
-				r.read() // Skip.
-			} else {
+			if p != 0 {
 				v := r.readValue(f.T)
 				m = m.Set(types.NewString(f.Name), v)
 			}

@@ -133,11 +133,10 @@ func (w *jsonArrayWriter) writeStruct(t types.TypeRef, m types.Map) {
 		v, ok := m.MaybeGet(types.NewString(f.Name))
 		if f.Optional {
 			if ok {
-				w.write(uint32(1))
+				w.write(true)
 				w.writeValue(f.T, v)
 			} else {
-				w.write(uint32(0))
-				w.write(uint32(0))
+				w.write(false)
 			}
 		} else {
 			d.Chk.True(ok)
