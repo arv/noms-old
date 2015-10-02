@@ -80,6 +80,12 @@ func (m ListOfMapOfStringToValue) TypeRef() types.TypeRef {
 	return __typeRefForListOfMapOfStringToValue
 }
 
+func init() {
+	types.RegisterFromValFunction(__typeRefForListOfMapOfStringToValue, func(v types.Value) types.NomsValue {
+		return ListOfMapOfStringToValueFromVal(v)
+	})
+}
+
 func (l ListOfMapOfStringToValue) Len() uint64 {
 	return l.l.Len()
 }
@@ -205,6 +211,12 @@ func (m MapOfStringToValue) TypeRef() types.TypeRef {
 	return __typeRefForMapOfStringToValue
 }
 
+func init() {
+	types.RegisterFromValFunction(__typeRefForMapOfStringToValue, func(v types.Value) types.NomsValue {
+		return MapOfStringToValueFromVal(v)
+	})
+}
+
 func (m MapOfStringToValue) Empty() bool {
 	return m.m.Empty()
 }
@@ -312,6 +324,12 @@ func (m MapOfStringToListOfPitch) TypeRef() types.TypeRef {
 	return __typeRefForMapOfStringToListOfPitch
 }
 
+func init() {
+	types.RegisterFromValFunction(__typeRefForMapOfStringToListOfPitch, func(v types.Value) types.NomsValue {
+		return MapOfStringToListOfPitchFromVal(v)
+	})
+}
+
 func (m MapOfStringToListOfPitch) Empty() bool {
 	return m.m.Empty()
 }
@@ -416,6 +434,12 @@ var __typeRefForListOfPitch = types.MakeCompoundTypeRef("", types.ListKind, type
 
 func (m ListOfPitch) TypeRef() types.TypeRef {
 	return __typeRefForListOfPitch
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefForListOfPitch, func(v types.Value) types.NomsValue {
+		return ListOfPitchFromVal(v)
+	})
 }
 
 func (l ListOfPitch) Len() uint64 {
@@ -541,6 +565,25 @@ func (s Pitch) NomsValue() types.Value {
 	return s.m
 }
 
+// A Noms Value that describes Pitch.
+var __typeRefForPitch = types.MakeStructTypeRef("Pitch",
+	[]types.Field{
+		types.Field{"X", types.MakePrimitiveTypeRef(types.Float64Kind), false},
+		types.Field{"Z", types.MakePrimitiveTypeRef(types.Float64Kind), false},
+	},
+	types.Choices{},
+)
+
+func (m Pitch) TypeRef() types.TypeRef {
+	return __typeRefForPitch
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefForPitch, func(v types.Value) types.NomsValue {
+		return PitchFromVal(v)
+	})
+}
+
 func (s Pitch) Equals(other Pitch) bool {
 	return s.m.Equals(other.m)
 }
@@ -616,6 +659,12 @@ var __typeRefForMapOfStringToString = types.MakeCompoundTypeRef("", types.MapKin
 
 func (m MapOfStringToString) TypeRef() types.TypeRef {
 	return __typeRefForMapOfStringToString
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefForMapOfStringToString, func(v types.Value) types.NomsValue {
+		return MapOfStringToStringFromVal(v)
+	})
 }
 
 func (m MapOfStringToString) Empty() bool {

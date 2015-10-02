@@ -74,6 +74,24 @@ func (s Tree) NomsValue() types.Value {
 	return s.m
 }
 
+// A Noms Value that describes Tree.
+var __typeRefForTree = types.MakeStructTypeRef("Tree",
+	[]types.Field{
+		types.Field{"children", types.MakeCompoundTypeRef("", types.ListKind, types.MakeTypeRef("Tree", ref.Ref{})), false},
+	},
+	types.Choices{},
+)
+
+func (m Tree) TypeRef() types.TypeRef {
+	return __typeRefForTree
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefForTree, func(v types.Value) types.NomsValue {
+		return TreeFromVal(v)
+	})
+}
+
 func (s Tree) Equals(other Tree) bool {
 	return s.m.Equals(other.m)
 }
@@ -140,6 +158,12 @@ var __typeRefForListOfTree = types.MakeCompoundTypeRef("", types.ListKind, types
 
 func (m ListOfTree) TypeRef() types.TypeRef {
 	return __typeRefForListOfTree
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefForListOfTree, func(v types.Value) types.NomsValue {
+		return ListOfTreeFromVal(v)
+	})
 }
 
 func (l ListOfTree) Len() uint64 {

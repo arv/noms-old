@@ -75,6 +75,24 @@ func (s EnumStruct) NomsValue() types.Value {
 	return s.m
 }
 
+// A Noms Value that describes EnumStruct.
+var __typeRefForEnumStruct = types.MakeStructTypeRef("EnumStruct",
+	[]types.Field{
+		types.Field{"hand", types.MakeTypeRef("Handedness", ref.Ref{}), false},
+	},
+	types.Choices{},
+)
+
+func (m EnumStruct) TypeRef() types.TypeRef {
+	return __typeRefForEnumStruct
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefForEnumStruct, func(v types.Value) types.NomsValue {
+		return EnumStructFromVal(v)
+	})
+}
+
 func (s EnumStruct) Equals(other EnumStruct) bool {
 	return s.m.Equals(other.m)
 }

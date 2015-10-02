@@ -81,6 +81,25 @@ func (s OptionalStruct) NomsValue() types.Value {
 	return s.m
 }
 
+// A Noms Value that describes OptionalStruct.
+var __typeRefForOptionalStruct = types.MakeStructTypeRef("OptionalStruct",
+	[]types.Field{
+		types.Field{"s", types.MakePrimitiveTypeRef(types.StringKind), true},
+		types.Field{"b", types.MakePrimitiveTypeRef(types.BoolKind), true},
+	},
+	types.Choices{},
+)
+
+func (m OptionalStruct) TypeRef() types.TypeRef {
+	return __typeRefForOptionalStruct
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefForOptionalStruct, func(v types.Value) types.NomsValue {
+		return OptionalStructFromVal(v)
+	})
+}
+
 func (s OptionalStruct) Equals(other OptionalStruct) bool {
 	return s.m.Equals(other.m)
 }

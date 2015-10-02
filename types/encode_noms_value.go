@@ -15,7 +15,7 @@ func (tv typedValue) TypedValue() interface{} {
 	return tv.v
 }
 
-func encNomsValue(v nomsValue, cs chunks.ChunkSink) interface{} {
+func encNomsValue(v NomsValue, cs chunks.ChunkSink) interface{} {
 	w := newJsonArrayWriter()
 	t := v.TypeRef()
 	w.writeTypeRef(t)
@@ -57,7 +57,7 @@ func (w *jsonArrayWriter) writeTypeRef(t TypeRef) {
 	}
 }
 
-func (w *jsonArrayWriter) writeNomsValue(nv nomsValue) {
+func (w *jsonArrayWriter) writeNomsValue(nv NomsValue) {
 	v := nv.NomsValue()
 	t := nv.TypeRef()
 	w.writeTypeRef(t)

@@ -79,6 +79,25 @@ func (s Struct) NomsValue() types.Value {
 	return s.m
 }
 
+// A Noms Value that describes Struct.
+var __typeRefForStruct = types.MakeStructTypeRef("Struct",
+	[]types.Field{
+		types.Field{"s", types.MakePrimitiveTypeRef(types.StringKind), false},
+		types.Field{"b", types.MakePrimitiveTypeRef(types.BoolKind), false},
+	},
+	types.Choices{},
+)
+
+func (m Struct) TypeRef() types.TypeRef {
+	return __typeRefForStruct
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefForStruct, func(v types.Value) types.NomsValue {
+		return StructFromVal(v)
+	})
+}
+
 func (s Struct) Equals(other Struct) bool {
 	return s.m.Equals(other.m)
 }

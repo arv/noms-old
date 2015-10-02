@@ -24,6 +24,18 @@ func ReadValue(r ref.Ref, cs chunks.ChunkSource) Value {
 	return fromEncodeable(i, cs).Deref(cs)
 }
 
+func ReadNomsValue(r ref.Ref, cs chunks.ChunkSource) NomsValue {
+	d.Chk.NotNil(cs)
+	c := cs.Get(r)
+	if c.IsEmpty() {
+		return nil
+	}
+
+	i := enc.Decode(bytes.NewReader(c.Data()))
+
+	return fromTypedEncodeable(i, cs)
+}
+
 func fromEncodeable(i interface{}, cs chunks.ChunkSource) Future {
 	switch i := i.(type) {
 	case bool:

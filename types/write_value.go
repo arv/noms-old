@@ -11,7 +11,7 @@ type primitive interface {
 	ToPrimitive() interface{}
 }
 
-type nomsValue interface {
+type NomsValue interface {
 	NomsValue() Value
 	TypeRef() TypeRef
 }
@@ -46,7 +46,7 @@ func toEncodeable(v interface{}, cs chunks.ChunkSink) interface{} {
 		return v.Reader()
 	case compoundBlob:
 		return encCompoundBlobFromCompoundBlob(v, cs)
-	case nomsValue:
+	case NomsValue:
 		return encNomsValue(v, cs)
 	case compoundList:
 		return encCompoundListFromCompoundList(v, cs)

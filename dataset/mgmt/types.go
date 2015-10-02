@@ -82,6 +82,12 @@ func (m SetOfDataset) TypeRef() types.TypeRef {
 	return __typeRefForSetOfDataset
 }
 
+func init() {
+	types.RegisterFromValFunction(__typeRefForSetOfDataset, func(v types.Value) types.NomsValue {
+		return SetOfDatasetFromVal(v)
+	})
+}
+
 func (s SetOfDataset) Empty() bool {
 	return s.s.Empty()
 }
@@ -207,6 +213,25 @@ func DatasetFromVal(val types.Value) Dataset {
 
 func (s Dataset) NomsValue() types.Value {
 	return s.m
+}
+
+// A Noms Value that describes Dataset.
+var __typeRefForDataset = types.MakeStructTypeRef("Dataset",
+	[]types.Field{
+		types.Field{"id", types.MakePrimitiveTypeRef(types.StringKind), false},
+		types.Field{"head", types.MakePrimitiveTypeRef(types.ValueKind), false},
+	},
+	types.Choices{},
+)
+
+func (m Dataset) TypeRef() types.TypeRef {
+	return __typeRefForDataset
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefForDataset, func(v types.Value) types.NomsValue {
+		return DatasetFromVal(v)
+	})
 }
 
 func (s Dataset) Equals(other Dataset) bool {

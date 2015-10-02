@@ -96,6 +96,12 @@ func (m ListOfIncident) TypeRef() types.TypeRef {
 	return __typeRefForListOfIncident
 }
 
+func init() {
+	types.RegisterFromValFunction(__typeRefForListOfIncident, func(v types.Value) types.NomsValue {
+		return ListOfIncidentFromVal(v)
+	})
+}
+
 func (l ListOfIncident) Len() uint64 {
 	return l.l.Len()
 }
@@ -255,6 +261,34 @@ func (s Incident) NomsValue() types.Value {
 	return s.m
 }
 
+// A Noms Value that describes Incident.
+var __typeRefForIncident = types.MakeStructTypeRef("Incident",
+	[]types.Field{
+		types.Field{"ID", types.MakePrimitiveTypeRef(types.Int64Kind), false},
+		types.Field{"Category", types.MakePrimitiveTypeRef(types.StringKind), false},
+		types.Field{"Description", types.MakePrimitiveTypeRef(types.StringKind), false},
+		types.Field{"DayOfWeek", types.MakePrimitiveTypeRef(types.StringKind), false},
+		types.Field{"Date", types.MakePrimitiveTypeRef(types.StringKind), false},
+		types.Field{"Time", types.MakePrimitiveTypeRef(types.StringKind), false},
+		types.Field{"PdDistrict", types.MakePrimitiveTypeRef(types.StringKind), false},
+		types.Field{"Resolution", types.MakePrimitiveTypeRef(types.StringKind), false},
+		types.Field{"Address", types.MakePrimitiveTypeRef(types.StringKind), false},
+		types.Field{"Geoposition", types.MakeTypeRef("Geoposition", ref.Ref{}), false},
+		types.Field{"PdID", types.MakePrimitiveTypeRef(types.StringKind), false},
+	},
+	types.Choices{},
+)
+
+func (m Incident) TypeRef() types.TypeRef {
+	return __typeRefForIncident
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefForIncident, func(v types.Value) types.NomsValue {
+		return IncidentFromVal(v)
+	})
+}
+
 func (s Incident) Equals(other Incident) bool {
 	return s.m.Equals(other.m)
 }
@@ -400,6 +434,25 @@ func GeopositionFromVal(val types.Value) Geoposition {
 
 func (s Geoposition) NomsValue() types.Value {
 	return s.m
+}
+
+// A Noms Value that describes Geoposition.
+var __typeRefForGeoposition = types.MakeStructTypeRef("Geoposition",
+	[]types.Field{
+		types.Field{"Latitude", types.MakePrimitiveTypeRef(types.Float32Kind), false},
+		types.Field{"Longitude", types.MakePrimitiveTypeRef(types.Float32Kind), false},
+	},
+	types.Choices{},
+)
+
+func (m Geoposition) TypeRef() types.TypeRef {
+	return __typeRefForGeoposition
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefForGeoposition, func(v types.Value) types.NomsValue {
+		return GeopositionFromVal(v)
+	})
 }
 
 func (s Geoposition) Equals(other Geoposition) bool {

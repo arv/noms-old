@@ -89,6 +89,27 @@ func (s StructWithList) NomsValue() types.Value {
 	return s.m
 }
 
+// A Noms Value that describes StructWithList.
+var __typeRefForStructWithList = types.MakeStructTypeRef("StructWithList",
+	[]types.Field{
+		types.Field{"l", types.MakeCompoundTypeRef("", types.ListKind, types.MakePrimitiveTypeRef(types.UInt8Kind)), false},
+		types.Field{"b", types.MakePrimitiveTypeRef(types.BoolKind), false},
+		types.Field{"s", types.MakePrimitiveTypeRef(types.StringKind), false},
+		types.Field{"i", types.MakePrimitiveTypeRef(types.Int64Kind), false},
+	},
+	types.Choices{},
+)
+
+func (m StructWithList) TypeRef() types.TypeRef {
+	return __typeRefForStructWithList
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefForStructWithList, func(v types.Value) types.NomsValue {
+		return StructWithListFromVal(v)
+	})
+}
+
 func (s StructWithList) Equals(other StructWithList) bool {
 	return s.m.Equals(other.m)
 }
@@ -179,6 +200,12 @@ var __typeRefForListOfUInt8 = types.MakeCompoundTypeRef("", types.ListKind, type
 
 func (m ListOfUInt8) TypeRef() types.TypeRef {
 	return __typeRefForListOfUInt8
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefForListOfUInt8, func(v types.Value) types.NomsValue {
+		return ListOfUInt8FromVal(v)
+	})
 }
 
 func (l ListOfUInt8) Len() uint64 {

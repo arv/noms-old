@@ -31,6 +31,7 @@ import (
 	"github.com/attic-labs/noms/d"
 )
 
+// typedValue is used to tag an object so that Encode will encode it using the typed serialization format.
 type typedValue interface {
 	TypedValue() interface{}
 }

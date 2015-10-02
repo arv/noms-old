@@ -120,6 +120,30 @@ func (s StructWithUnionField) NomsValue() types.Value {
 	return s.m
 }
 
+// A Noms Value that describes StructWithUnionField.
+var __typeRefForStructWithUnionField = types.MakeStructTypeRef("StructWithUnionField",
+	[]types.Field{
+		types.Field{"a", types.MakePrimitiveTypeRef(types.Float32Kind), false},
+	},
+	types.Choices{
+		types.Field{"b", types.MakePrimitiveTypeRef(types.Float64Kind), false},
+		types.Field{"c", types.MakePrimitiveTypeRef(types.StringKind), false},
+		types.Field{"d", types.MakePrimitiveTypeRef(types.BlobKind), false},
+		types.Field{"e", types.MakePrimitiveTypeRef(types.ValueKind), false},
+		types.Field{"f", types.MakeCompoundTypeRef("", types.SetKind, types.MakePrimitiveTypeRef(types.UInt8Kind)), false},
+	},
+)
+
+func (m StructWithUnionField) TypeRef() types.TypeRef {
+	return __typeRefForStructWithUnionField
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefForStructWithUnionField, func(v types.Value) types.NomsValue {
+		return StructWithUnionFieldFromVal(v)
+	})
+}
+
 func (s StructWithUnionField) Equals(other StructWithUnionField) bool {
 	return s.m.Equals(other.m)
 }
@@ -308,6 +332,12 @@ var __typeRefForSetOfUInt8 = types.MakeCompoundTypeRef("", types.SetKind, types.
 
 func (m SetOfUInt8) TypeRef() types.TypeRef {
 	return __typeRefForSetOfUInt8
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefForSetOfUInt8, func(v types.Value) types.NomsValue {
+		return SetOfUInt8FromVal(v)
+	})
 }
 
 func (s SetOfUInt8) Empty() bool {

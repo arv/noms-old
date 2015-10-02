@@ -6,6 +6,31 @@ import (
 	"github.com/attic-labs/noms/ref"
 )
 
+type valueAsNomsValue struct {
+	v Value
+}
+
+func (v valueAsNomsValue) NomsValue() Value {
+	return v.v
+}
+
+func (v valueAsNomsValue) TypeRef() TypeRef {
+	return v.TypeRef()
+}
+
+func fromTypedEncodeable(i interface{}, cs chunks.ChunkSource) NomsValue {
+	r := newJsonArrayReader(i.([]interface{}))
+	t := r.readTypeRef()
+	v := r.readTopLevelValue(t)
+	switch v := v.(type) {
+	case NomsValue:
+		return v
+	case Value:
+		return valueAsNomsValue{v}
+	}
+	panic("unreachable")
+}
+
 type jsonArrayReader struct {
 	a []interface{}
 	i int
@@ -149,6 +174,17 @@ func (r *jsonArrayReader) readEnum(TypeRef) Value {
 
 func (r *jsonArrayReader) readValue(t TypeRef) Value {
 	switch t.Kind() {
+	case ListKind, MapKind, SetKind:
+		a := r.readArray()
+		r2 := newJsonArrayReader(a)
+		return r2.readTopLevelValue(t)
+	default:
+		return r.readTopLevelValue(t)
+	}
+}
+
+func (r *jsonArrayReader) readTopLevelValue(t TypeRef) Value {
+	switch t.Kind() {
 	case BoolKind:
 		return Bool(r.read().(bool))
 	case UInt8Kind:
@@ -180,19 +216,13 @@ func (r *jsonArrayReader) readValue(t TypeRef) Value {
 		t := r.readTypeRef()
 		return r.readValue(t)
 	case ListKind:
-		a := r.readArray()
-		r2 := newJsonArrayReader(a)
-		return r2.readList(t)
+		return r.readList(t)
 	case MapKind:
-		a := r.readArray()
-		r2 := newJsonArrayReader(a)
-		return r2.readMap(t)
+		return r.readMap(t)
 	case RefKind:
 		panic("not implemented")
 	case SetKind:
-		a := r.readArray()
-		r2 := newJsonArrayReader(a)
-		return r2.readSet(t)
+		return r.readSet(t)
 	case EnumKind:
 		return r.readEnum(t)
 	case StructKind:

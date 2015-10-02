@@ -58,6 +58,25 @@ func (s Commit) NomsValue() types.Value {
 	return s.m
 }
 
+// A Noms Value that describes Commit.
+var __typeRefForCommit = types.MakeStructTypeRef("Commit",
+	[]types.Field{
+		types.Field{"value", types.MakePrimitiveTypeRef(types.ValueKind), false},
+		types.Field{"parents", types.MakeCompoundTypeRef("", types.SetKind, types.MakeTypeRef("Commit", ref.Ref{})), false},
+	},
+	types.Choices{},
+)
+
+func (m Commit) TypeRef() types.TypeRef {
+	return __typeRefForCommit
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefForCommit, func(v types.Value) types.NomsValue {
+		return CommitFromVal(v)
+	})
+}
+
 func (s Commit) Equals(other Commit) bool {
 	return s.m.Equals(other.m)
 }
@@ -113,6 +132,12 @@ var __typeRefForSetOfCommit = types.MakeCompoundTypeRef("", types.SetKind, types
 
 func (m SetOfCommit) TypeRef() types.TypeRef {
 	return __typeRefForSetOfCommit
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefForSetOfCommit, func(v types.Value) types.NomsValue {
+		return SetOfCommitFromVal(v)
+	})
 }
 
 func (s SetOfCommit) Empty() bool {

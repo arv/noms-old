@@ -91,6 +91,37 @@ func (s StructWithUnions) NomsValue() types.Value {
 	return s.m
 }
 
+// A Noms Value that describes StructWithUnions.
+var __typeRefForStructWithUnions = types.MakeStructTypeRef("StructWithUnions",
+	[]types.Field{
+		types.Field{"a", types.MakeStructTypeRef("",
+			[]types.Field{},
+			types.Choices{
+				types.Field{"b", types.MakePrimitiveTypeRef(types.Float64Kind), false},
+				types.Field{"c", types.MakePrimitiveTypeRef(types.StringKind), false},
+			},
+		), false},
+		types.Field{"d", types.MakeStructTypeRef("",
+			[]types.Field{},
+			types.Choices{
+				types.Field{"e", types.MakePrimitiveTypeRef(types.Float64Kind), false},
+				types.Field{"f", types.MakePrimitiveTypeRef(types.StringKind), false},
+			},
+		), false},
+	},
+	types.Choices{},
+)
+
+func (m StructWithUnions) TypeRef() types.TypeRef {
+	return __typeRefForStructWithUnions
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefForStructWithUnions, func(v types.Value) types.NomsValue {
+		return StructWithUnionsFromVal(v)
+	})
+}
+
 func (s StructWithUnions) Equals(other StructWithUnions) bool {
 	return s.m.Equals(other.m)
 }
@@ -184,6 +215,25 @@ func __unionOfBOfFloat64AndCOfStringFromVal(val types.Value) __unionOfBOfFloat64
 
 func (s __unionOfBOfFloat64AndCOfString) NomsValue() types.Value {
 	return s.m
+}
+
+// A Noms Value that describes __unionOfBOfFloat64AndCOfString.
+var __typeRefFor__unionOfBOfFloat64AndCOfString = types.MakeStructTypeRef("",
+	[]types.Field{},
+	types.Choices{
+		types.Field{"b", types.MakePrimitiveTypeRef(types.Float64Kind), false},
+		types.Field{"c", types.MakePrimitiveTypeRef(types.StringKind), false},
+	},
+)
+
+func (m __unionOfBOfFloat64AndCOfString) TypeRef() types.TypeRef {
+	return __typeRefFor__unionOfBOfFloat64AndCOfString
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefFor__unionOfBOfFloat64AndCOfString, func(v types.Value) types.NomsValue {
+		return __unionOfBOfFloat64AndCOfStringFromVal(v)
+	})
 }
 
 func (s __unionOfBOfFloat64AndCOfString) Equals(other __unionOfBOfFloat64AndCOfString) bool {
@@ -311,6 +361,25 @@ func __unionOfEOfFloat64AndFOfStringFromVal(val types.Value) __unionOfEOfFloat64
 
 func (s __unionOfEOfFloat64AndFOfString) NomsValue() types.Value {
 	return s.m
+}
+
+// A Noms Value that describes __unionOfEOfFloat64AndFOfString.
+var __typeRefFor__unionOfEOfFloat64AndFOfString = types.MakeStructTypeRef("",
+	[]types.Field{},
+	types.Choices{
+		types.Field{"e", types.MakePrimitiveTypeRef(types.Float64Kind), false},
+		types.Field{"f", types.MakePrimitiveTypeRef(types.StringKind), false},
+	},
+)
+
+func (m __unionOfEOfFloat64AndFOfString) TypeRef() types.TypeRef {
+	return __typeRefFor__unionOfEOfFloat64AndFOfString
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefFor__unionOfEOfFloat64AndFOfString, func(v types.Value) types.NomsValue {
+		return __unionOfEOfFloat64AndFOfStringFromVal(v)
+	})
 }
 
 func (s __unionOfEOfFloat64AndFOfString) Equals(other __unionOfEOfFloat64AndFOfString) bool {

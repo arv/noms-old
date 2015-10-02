@@ -4,3 +4,10 @@ var __typeRefFor{{.Name}} = {{toTypesTypeRef .Type}}
 func (m {{.Name}}) TypeRef() types.TypeRef {
 	return __typeRefFor{{.Name}}
 }
+
+func init() {
+	types.RegisterFromValFunction(__typeRefFor{{.Name}}, func(v types.Value) types.NomsValue {
+		return {{.Name}}FromVal(v)
+	})
+}
+

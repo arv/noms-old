@@ -108,6 +108,12 @@ func (m ListOfIncident) TypeRef() types.TypeRef {
 	return __typeRefForListOfIncident
 }
 
+func init() {
+	types.RegisterFromValFunction(__typeRefForListOfIncident, func(v types.Value) types.NomsValue {
+		return ListOfIncidentFromVal(v)
+	})
+}
+
 func (l ListOfIncident) Len() uint64 {
 	return l.l.Len()
 }
@@ -243,6 +249,28 @@ func (s Incident) NomsValue() types.Value {
 	return s.m
 }
 
+// A Noms Value that describes Incident.
+var __typeRefForIncident = types.MakeStructTypeRef("Incident",
+	[]types.Field{
+		types.Field{"Category", types.MakePrimitiveTypeRef(types.StringKind), false},
+		types.Field{"Description", types.MakePrimitiveTypeRef(types.StringKind), false},
+		types.Field{"Address", types.MakePrimitiveTypeRef(types.StringKind), false},
+		types.Field{"Date", types.MakePrimitiveTypeRef(types.StringKind), false},
+		types.Field{"Geoposition", types.MakeTypeRef("Geoposition", ref.Ref{}), false},
+	},
+	types.Choices{},
+)
+
+func (m Incident) TypeRef() types.TypeRef {
+	return __typeRefForIncident
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefForIncident, func(v types.Value) types.NomsValue {
+		return IncidentFromVal(v)
+	})
+}
+
 func (s Incident) Equals(other Incident) bool {
 	return s.m.Equals(other.m)
 }
@@ -342,6 +370,25 @@ func (s Geoposition) NomsValue() types.Value {
 	return s.m
 }
 
+// A Noms Value that describes Geoposition.
+var __typeRefForGeoposition = types.MakeStructTypeRef("Geoposition",
+	[]types.Field{
+		types.Field{"Latitude", types.MakePrimitiveTypeRef(types.Float32Kind), false},
+		types.Field{"Longitude", types.MakePrimitiveTypeRef(types.Float32Kind), false},
+	},
+	types.Choices{},
+)
+
+func (m Geoposition) TypeRef() types.TypeRef {
+	return __typeRefForGeoposition
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefForGeoposition, func(v types.Value) types.NomsValue {
+		return GeopositionFromVal(v)
+	})
+}
+
 func (s Geoposition) Equals(other Geoposition) bool {
 	return s.m.Equals(other.m)
 }
@@ -415,6 +462,25 @@ func GeorectangleFromVal(val types.Value) Georectangle {
 
 func (s Georectangle) NomsValue() types.Value {
 	return s.m
+}
+
+// A Noms Value that describes Georectangle.
+var __typeRefForGeorectangle = types.MakeStructTypeRef("Georectangle",
+	[]types.Field{
+		types.Field{"TopLeft", types.MakeTypeRef("Geoposition", ref.Ref{}), false},
+		types.Field{"BottomRight", types.MakeTypeRef("Geoposition", ref.Ref{}), false},
+	},
+	types.Choices{},
+)
+
+func (m Georectangle) TypeRef() types.TypeRef {
+	return __typeRefForGeorectangle
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefForGeorectangle, func(v types.Value) types.NomsValue {
+		return GeorectangleFromVal(v)
+	})
 }
 
 func (s Georectangle) Equals(other Georectangle) bool {
@@ -506,6 +572,29 @@ func SQuadTreeFromVal(val types.Value) SQuadTree {
 
 func (s SQuadTree) NomsValue() types.Value {
 	return s.m
+}
+
+// A Noms Value that describes SQuadTree.
+var __typeRefForSQuadTree = types.MakeStructTypeRef("SQuadTree",
+	[]types.Field{
+		types.Field{"Nodes", types.MakeCompoundTypeRef("", types.ListKind, types.MakeTypeRef("Incident", ref.Ref{})), false},
+		types.Field{"Tiles", types.MakeCompoundTypeRef("", types.MapKind, types.MakePrimitiveTypeRef(types.StringKind), types.MakeTypeRef("SQuadTree", ref.Ref{})), false},
+		types.Field{"Depth", types.MakePrimitiveTypeRef(types.UInt8Kind), false},
+		types.Field{"NumDescendents", types.MakePrimitiveTypeRef(types.UInt32Kind), false},
+		types.Field{"Path", types.MakePrimitiveTypeRef(types.StringKind), false},
+		types.Field{"Georectangle", types.MakeTypeRef("Georectangle", ref.Ref{}), false},
+	},
+	types.Choices{},
+)
+
+func (m SQuadTree) TypeRef() types.TypeRef {
+	return __typeRefForSQuadTree
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefForSQuadTree, func(v types.Value) types.NomsValue {
+		return SQuadTreeFromVal(v)
+	})
 }
 
 func (s SQuadTree) Equals(other SQuadTree) bool {
@@ -615,6 +704,12 @@ var __typeRefForMapOfStringToSQuadTree = types.MakeCompoundTypeRef("", types.Map
 
 func (m MapOfStringToSQuadTree) TypeRef() types.TypeRef {
 	return __typeRefForMapOfStringToSQuadTree
+}
+
+func init() {
+	types.RegisterFromValFunction(__typeRefForMapOfStringToSQuadTree, func(v types.Value) types.NomsValue {
+		return MapOfStringToSQuadTreeFromVal(v)
+	})
 }
 
 func (m MapOfStringToSQuadTree) Empty() bool {
