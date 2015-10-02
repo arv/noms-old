@@ -6,10 +6,7 @@ import (
 	"github.com/attic-labs/noms/ref"
 )
 
-type encodableValue interface {
-	TypeRef() TypeRef
-}
-
+// typedValue implements enc.typedValue which is used to tag the value for now so that we can trigger a different encoding strategy.
 type typedValue struct {
 	v interface{}
 }
