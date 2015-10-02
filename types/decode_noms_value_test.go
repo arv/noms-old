@@ -7,13 +7,15 @@ import (
 	"testing"
 
 	"github.com/attic-labs/noms/Godeps/_workspace/src/github.com/stretchr/testify/assert"
+	"github.com/attic-labs/noms/chunks"
 )
 
 func TestRead(t *testing.T) {
 	assert := assert.New(t)
+	cs := chunks.NewMemoryStore()
 
 	a := []interface{}{int64(1), "hi", true}
-	r := newJsonArrayReader(a)
+	r := newJsonArrayReader(a, cs)
 
 	assert.Equal(int64(1), r.readInt64())
 	assert.False(r.atEnd())
@@ -33,13 +35,14 @@ func parseJson(s string) (v []interface{}) {
 
 func TestReadTypeRef(t *testing.T) {
 	assert := assert.New(t)
+	cs := chunks.NewMemoryStore()
 
 	a := parseJson(`[0, true]`)
-	r := newJsonArrayReader(a)
+	r := newJsonArrayReader(a, cs)
 	k := r.readKind()
 	assert.Equal(BoolKind, k)
 
-	r = newJsonArrayReader(a)
+	r = newJsonArrayReader(a, cs)
 	tr := r.readTypeRef()
 	assert.Equal(BoolKind, tr.Kind())
 	b := r.readValue(tr)
@@ -48,9 +51,10 @@ func TestReadTypeRef(t *testing.T) {
 
 func TestReadListOfInt32(t *testing.T) {
 	assert := assert.New(t)
+	cs := chunks.NewMemoryStore()
 
 	a := parseJson(fmt.Sprintf("[%d, %d, 0, 1, 2, 3]", ListKind, Int32Kind))
-	r := newJsonArrayReader(a)
+	r := newJsonArrayReader(a, cs)
 	tr := r.readTypeRef()
 	assert.Equal(ListKind, tr.Kind())
 	assert.Equal(Int32Kind, tr.Desc.(CompoundDesc).ElemTypes[0].Kind())
@@ -60,9 +64,10 @@ func TestReadListOfInt32(t *testing.T) {
 
 func TestReadListOfValue(t *testing.T) {
 	assert := assert.New(t)
+	cs := chunks.NewMemoryStore()
 
 	a := parseJson(fmt.Sprintf(`[%d, %d, %d, 1, %d, "hi", %d, true]`, ListKind, ValueKind, Int32Kind, StringKind, BoolKind))
-	r := newJsonArrayReader(a)
+	r := newJsonArrayReader(a, cs)
 	tr := r.readTypeRef()
 	assert.Equal(ListKind, tr.Kind())
 	assert.Equal(ValueKind, tr.Desc.(CompoundDesc).ElemTypes[0].Kind())
@@ -72,9 +77,10 @@ func TestReadListOfValue(t *testing.T) {
 
 func TestReadValueListOfInt8(t *testing.T) {
 	assert := assert.New(t)
+	cs := chunks.NewMemoryStore()
 
 	a := parseJson(fmt.Sprintf(`[%d, %d, %d, [0, 1, 2]]`, ValueKind, ListKind, Int8Kind))
-	r := newJsonArrayReader(a)
+	r := newJsonArrayReader(a, cs)
 	tr := r.readTypeRef()
 	assert.Equal(ValueKind, tr.Kind())
 	l := r.readValue(tr)
@@ -83,9 +89,10 @@ func TestReadValueListOfInt8(t *testing.T) {
 
 func TestReadMapOfInt64ToFloat64(t *testing.T) {
 	assert := assert.New(t)
+	cs := chunks.NewMemoryStore()
 
 	a := parseJson(fmt.Sprintf("[%d, %d, %d, 0, 1, 2, 3]", MapKind, Int64Kind, Float64Kind))
-	r := newJsonArrayReader(a)
+	r := newJsonArrayReader(a, cs)
 	tr := r.readTypeRef()
 	assert.Equal(MapKind, tr.Kind())
 	assert.Equal(Int64Kind, tr.Desc.(CompoundDesc).ElemTypes[0].Kind())
@@ -96,9 +103,10 @@ func TestReadMapOfInt64ToFloat64(t *testing.T) {
 
 func TestReadValueMapOfUInt64ToUInt32(t *testing.T) {
 	assert := assert.New(t)
+	cs := chunks.NewMemoryStore()
 
 	a := parseJson(fmt.Sprintf("[%d, %d, %d, %d, [0, 1, 2, 3]]", ValueKind, MapKind, UInt64Kind, UInt32Kind))
-	r := newJsonArrayReader(a)
+	r := newJsonArrayReader(a, cs)
 	tr := r.readTypeRef()
 	assert.Equal(ValueKind, tr.Kind())
 	m := r.readValue(tr)
@@ -107,9 +115,10 @@ func TestReadValueMapOfUInt64ToUInt32(t *testing.T) {
 
 func TestReadSetOfUInt8(t *testing.T) {
 	assert := assert.New(t)
+	cs := chunks.NewMemoryStore()
 
 	a := parseJson(fmt.Sprintf("[%d, %d, 0, 1, 2, 3]", SetKind, UInt8Kind))
-	r := newJsonArrayReader(a)
+	r := newJsonArrayReader(a, cs)
 	tr := r.readTypeRef()
 	assert.Equal(SetKind, tr.Kind())
 	assert.Equal(UInt8Kind, tr.Desc.(CompoundDesc).ElemTypes[0].Kind())
@@ -119,9 +128,10 @@ func TestReadSetOfUInt8(t *testing.T) {
 
 func TestReadValueSetOfUInt16(t *testing.T) {
 	assert := assert.New(t)
+	cs := chunks.NewMemoryStore()
 
 	a := parseJson(fmt.Sprintf("[%d, %d, %d, [0, 1, 2, 3]]", ValueKind, SetKind, UInt16Kind))
-	r := newJsonArrayReader(a)
+	r := newJsonArrayReader(a, cs)
 	tr := r.readTypeRef()
 	assert.Equal(ValueKind, tr.Kind())
 	m := r.readValue(tr)
@@ -130,6 +140,7 @@ func TestReadValueSetOfUInt16(t *testing.T) {
 
 func TestReadStruct(t *testing.T) {
 	assert := assert.New(t)
+	cs := chunks.NewMemoryStore()
 
 	// Cannot use parse since it is in a different package that depends on types!
 	// struct A1 {
@@ -148,7 +159,7 @@ func TestReadStruct(t *testing.T) {
 
 	// TODO: Should use ordinal of type and not name
 	a := parseJson(fmt.Sprintf(`[%d, "%s", "A1", 42, "hi", true]`, StructKind, ref.String()))
-	r := newJsonArrayReader(a)
+	r := newJsonArrayReader(a, cs)
 	tr := r.readTypeRef()
 	assert.Equal(StructKind, tr.Kind())
 	v := r.readStruct(tr)
@@ -162,6 +173,7 @@ func TestReadStruct(t *testing.T) {
 
 func TestReadStructUnion(t *testing.T) {
 	assert := assert.New(t)
+	cs := chunks.NewMemoryStore()
 
 	// Cannot use parse since it is in a different package that depends on types!
 	// struct A2 {
@@ -182,7 +194,7 @@ func TestReadStructUnion(t *testing.T) {
 	ref := RegisterPackage(&pkg)
 
 	a := parseJson(fmt.Sprintf(`[%d, "%s", "A2", 42, 1, "hi"]`, StructKind, ref.String()))
-	r := newJsonArrayReader(a)
+	r := newJsonArrayReader(a, cs)
 	tr := r.readTypeRef()
 	assert.Equal(StructKind, tr.Kind())
 	v := r.readStruct(tr)
@@ -198,6 +210,7 @@ func TestReadStructUnion(t *testing.T) {
 
 func TestReadStructOptional(t *testing.T) {
 	assert := assert.New(t)
+	cs := chunks.NewMemoryStore()
 
 	// Cannot use parse since it is in a different package that depends on types!
 	// struct A3 {
@@ -216,7 +229,7 @@ func TestReadStructOptional(t *testing.T) {
 
 	// TODO: Should use ordinal of type and not name
 	a := parseJson(fmt.Sprintf(`[%d, "%s", "A3", 42, false, true, false]`, StructKind, ref.String()))
-	r := newJsonArrayReader(a)
+	r := newJsonArrayReader(a, cs)
 	tr := r.readTypeRef()
 	assert.Equal(StructKind, tr.Kind())
 	v := r.readStruct(tr)
@@ -230,6 +243,7 @@ func TestReadStructOptional(t *testing.T) {
 
 func TestReadStructWithList(t *testing.T) {
 	assert := assert.New(t)
+	cs := chunks.NewMemoryStore()
 
 	// Cannot use parse since it is in a different package that depends on types!
 	// struct A4 {
@@ -248,7 +262,7 @@ func TestReadStructWithList(t *testing.T) {
 
 	// TODO: Should use ordinal of type and not name
 	a := parseJson(fmt.Sprintf(`[%d, "%s", "A4", true, [0, 1, 2], "hi"]`, StructKind, ref.String()))
-	r := newJsonArrayReader(a)
+	r := newJsonArrayReader(a, cs)
 	tr := r.readTypeRef()
 	assert.Equal(StructKind, tr.Kind())
 	v := r.readStruct(tr)
@@ -262,6 +276,7 @@ func TestReadStructWithList(t *testing.T) {
 
 func TestReadStructWithValue(t *testing.T) {
 	assert := assert.New(t)
+	cs := chunks.NewMemoryStore()
 
 	// Cannot use parse since it is in a different package that depends on types!
 	// struct A5 {
@@ -280,7 +295,7 @@ func TestReadStructWithValue(t *testing.T) {
 
 	// TODO: Should use ordinal of type and not name
 	a := parseJson(fmt.Sprintf(`[%d, "%s", "A5", true, %d, 42, "hi"]`, StructKind, ref.String(), UInt8Kind))
-	r := newJsonArrayReader(a)
+	r := newJsonArrayReader(a, cs)
 	tr := r.readTypeRef()
 	assert.Equal(StructKind, tr.Kind())
 	v := r.readStruct(tr)
@@ -294,6 +309,7 @@ func TestReadStructWithValue(t *testing.T) {
 
 func TestReadValueStruct(t *testing.T) {
 	assert := assert.New(t)
+	cs := chunks.NewMemoryStore()
 
 	// Cannot use parse since it is in a different package that depends on types!
 	// struct A1 {
@@ -312,7 +328,7 @@ func TestReadValueStruct(t *testing.T) {
 
 	// TODO: Should use ordinal of type and not name
 	a := parseJson(fmt.Sprintf(`[%d, %d, "%s", "A1", 42, "hi", true]`, ValueKind, StructKind, ref.String()))
-	r := newJsonArrayReader(a)
+	r := newJsonArrayReader(a, cs)
 	tr := r.readTypeRef()
 	assert.Equal(ValueKind, tr.Kind())
 	v := r.readValue(tr).(Map)
@@ -326,6 +342,7 @@ func TestReadValueStruct(t *testing.T) {
 
 func TestReadEnum(t *testing.T) {
 	assert := assert.New(t)
+	cs := chunks.NewMemoryStore()
 
 	tref := MakeEnumTypeRef("E", "a", "b", "c")
 	pkg := NewPackage().SetNamedTypes(NewMapOfStringToTypeRef().Set("E", tref))
@@ -333,7 +350,7 @@ func TestReadEnum(t *testing.T) {
 
 	// TODO: Should use ordinal of type and not name
 	a := parseJson(fmt.Sprintf(`[%d, "%s", "E", 1]`, EnumKind, ref.String()))
-	r := newJsonArrayReader(a)
+	r := newJsonArrayReader(a, cs)
 	tr := r.readTypeRef()
 	assert.Equal(EnumKind, tr.Kind())
 	v := r.readEnum(tr)
@@ -342,6 +359,7 @@ func TestReadEnum(t *testing.T) {
 
 func TestReadValueEnum(t *testing.T) {
 	assert := assert.New(t)
+	cs := chunks.NewMemoryStore()
 
 	tref := MakeEnumTypeRef("E", "a", "b", "c")
 	pkg := NewPackage().SetNamedTypes(NewMapOfStringToTypeRef().Set("E", tref))
@@ -349,7 +367,7 @@ func TestReadValueEnum(t *testing.T) {
 
 	// TODO: Should use ordinal of type and not name
 	a := parseJson(fmt.Sprintf(`[%d, %d, "%s", "E", 1]`, ValueKind, EnumKind, ref.String()))
-	r := newJsonArrayReader(a)
+	r := newJsonArrayReader(a, cs)
 	tr := r.readTypeRef()
 	assert.Equal(ValueKind, tr.Kind())
 	v := r.readValue(tr)

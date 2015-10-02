@@ -33,7 +33,7 @@ import (
 
 // typedValue is used to tag an object so that Encode will encode it using the typed serialization format.
 type typedValue interface {
-	TypedValue() interface{}
+	TypedValue() []interface{}
 }
 
 // Encode serializes v into dst, and panics on unsupported types.
@@ -43,7 +43,7 @@ func Encode(dst io.Writer, v interface{}) {
 	case io.Reader:
 		blobLeafEncode(dst, v)
 	case typedValue:
-		typedEncode(dst, v.TypedValue())
+		typedEncode(dst, v)
 	default:
 		jsonEncode(dst, v)
 	}

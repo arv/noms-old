@@ -18,8 +18,9 @@ func (v valueAsNomsValue) TypeRef() TypeRef {
 	return v.TypeRef()
 }
 
-func fromTypedEncodeable(i interface{}, cs chunks.ChunkSource) NomsValue {
-	r := newJsonArrayReader(i.([]interface{}))
+func fromTypedEncodeable(w typedValueWrapper, cs chunks.ChunkSource) NomsValue {
+	i := w.TypedValue()
+	r := newJsonArrayReader(i, cs)
 	t := r.readTypeRef()
 	v := r.readTopLevelValue(t)
 	switch v := v.(type) {
@@ -32,12 +33,13 @@ func fromTypedEncodeable(i interface{}, cs chunks.ChunkSource) NomsValue {
 }
 
 type jsonArrayReader struct {
-	a []interface{}
-	i int
+	a  []interface{}
+	i  int
+	cs chunks.ChunkSource
 }
 
-func newJsonArrayReader(a []interface{}) *jsonArrayReader {
-	return &jsonArrayReader{a: a, i: 0}
+func newJsonArrayReader(a []interface{}, cs chunks.ChunkSource) *jsonArrayReader {
+	return &jsonArrayReader{a: a, i: 0, cs: cs}
 }
 
 func (r *jsonArrayReader) read() interface{} {
@@ -75,7 +77,7 @@ func (r *jsonArrayReader) readRef() ref.Ref {
 	return ref.Parse(s)
 }
 
-func (r *jsonArrayReader) readPackage(cs chunks.ChunkSource) *Package {
+func (r *jsonArrayReader) readPackage() *Package {
 	ref := r.readRef()
 	// TODO: Should load the package if not registered?
 	return LookupPackage(ref)
@@ -95,8 +97,7 @@ func (r *jsonArrayReader) readTypeRef() TypeRef {
 		valueType := r.readTypeRef()
 		return MakeCompoundTypeRef("", kind, keyType, valueType)
 	case EnumKind, StructKind:
-		// TODO: Provide chunk source?
-		pkg := r.readPackage(nil)
+		pkg := r.readPackage()
 		d.Chk.NotNil(pkg)
 		name := r.readString()
 		// TODO: This is wrong. Package uses name to TypeRef
@@ -176,7 +177,7 @@ func (r *jsonArrayReader) readValue(t TypeRef) Value {
 	switch t.Kind() {
 	case ListKind, MapKind, SetKind:
 		a := r.readArray()
-		r2 := newJsonArrayReader(a)
+		r2 := newJsonArrayReader(a, r.cs)
 		return r2.readTopLevelValue(t)
 	default:
 		return r.readTopLevelValue(t)

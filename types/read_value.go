@@ -21,19 +21,11 @@ func ReadValue(r ref.Ref, cs chunks.ChunkSource) Value {
 
 	i := enc.Decode(bytes.NewReader(c.Data()))
 
-	return fromEncodeable(i, cs).Deref(cs)
-}
-
-func ReadNomsValue(r ref.Ref, cs chunks.ChunkSource) NomsValue {
-	d.Chk.NotNil(cs)
-	c := cs.Get(r)
-	if c.IsEmpty() {
-		return nil
+	if i, ok := i.(typedValueWrapper); ok {
+		return fromTypedEncodeable(i, cs).NomsValue()
 	}
 
-	i := enc.Decode(bytes.NewReader(c.Data()))
-
-	return fromTypedEncodeable(i, cs)
+	return fromEncodeable(i, cs).Deref(cs)
 }
 
 func fromEncodeable(i interface{}, cs chunks.ChunkSource) Future {

@@ -9,14 +9,6 @@ import (
 	"github.com/attic-labs/noms/d"
 )
 
-type testTypedValue struct {
-	v interface{}
-}
-
-func (t testTypedValue) TypedValue() interface{} {
-	return t.v
-}
-
 func TestEncode(t *testing.T) {
 	assert := assert.New(t)
 
@@ -31,7 +23,7 @@ func TestEncode(t *testing.T) {
 	assert.Equal("j \"foo\"\n", string(dst.Bytes()))
 
 	dst.Reset()
-	Encode(dst, testTypedValue{[]interface{}{42}})
+	Encode(dst, typedValueWrapper{[]interface{}{42}})
 	assert.Equal("t [42]\n", string(dst.Bytes()))
 }
 
