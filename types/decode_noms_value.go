@@ -221,7 +221,7 @@ func (r *jsonArrayReader) readTopLevelValue(t TypeRef) Value {
 	case MapKind:
 		return r.readMap(t)
 	case RefKind:
-		panic("not implemented")
+		return Ref{r.readRef()}
 	case SetKind:
 		return r.readSet(t)
 	case EnumKind:

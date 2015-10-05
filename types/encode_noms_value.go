@@ -92,7 +92,7 @@ func (w *jsonArrayWriter) writeTopLevelValue(t TypeRef, v Value, pkg *Package) {
 	case MapKind:
 		w.writeMap(t, v.(Map), pkg)
 	case RefKind:
-		panic("not yet implemented")
+		w.writeRef(v.Ref())
 	case SetKind:
 		w.writeSet(t, v.(Set), pkg)
 	case EnumKind, StructKind:

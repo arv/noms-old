@@ -8,6 +8,7 @@ import (
 
 	"github.com/attic-labs/noms/Godeps/_workspace/src/github.com/stretchr/testify/assert"
 	"github.com/attic-labs/noms/chunks"
+	"github.com/attic-labs/noms/ref"
 )
 
 func TestRead(t *testing.T) {
@@ -372,4 +373,19 @@ func TestReadValueEnum(t *testing.T) {
 	assert.Equal(ValueKind, tr.Kind())
 	v := r.readValue(tr)
 	assert.Equal(uint32(1), uint32(v.(UInt32)))
+}
+
+func TestReadRef(t *testing.T) {
+	assert := assert.New(t)
+	cs := chunks.NewMemoryStore()
+
+	r := ref.Parse("sha1-a9993e364706816aba3e25717850c26c9cd0d89d")
+
+	a := parseJson(fmt.Sprintf(`[%d, %d, "%s"]`, RefKind, UInt32Kind, r.String()))
+	reader := newJsonArrayReader(a, cs)
+	tr := reader.readTypeRef()
+	assert.Equal(RefKind, tr.Kind())
+	assert.Equal(UInt32Kind, tr.Desc.(CompoundDesc).ElemTypes[0].Kind())
+	rOut := reader.readRef()
+	assert.Equal(r, rOut)
 }

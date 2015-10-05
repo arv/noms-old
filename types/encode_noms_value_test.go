@@ -353,3 +353,16 @@ func TestWriteListOfValueWithStruct(t *testing.T) {
 	w.writeList(tref, v, &pkg)
 	assert.EqualValues([]interface{}{ListKind, ValueKind, TypeRefKind, pkgRef.String(), "S", int32(42)}, *w)
 }
+
+func TestWriteRef(t *testing.T) {
+	assert := assert.New(t)
+
+	tref := MakeCompoundTypeRef("", RefKind, MakePrimitiveTypeRef(UInt32Kind))
+
+	w := newJsonArrayWriter()
+	w.writeTypeRef(tref)
+	r := ref.Parse("sha1-a9993e364706816aba3e25717850c26c9cd0d89d")
+	w.writeRef(r)
+
+	assert.EqualValues([]interface{}{RefKind, UInt32Kind, r.String()}, *w)
+}
