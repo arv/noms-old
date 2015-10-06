@@ -106,29 +106,30 @@ func (r *jsonArrayReader) readTypeRef() TypeRef {
 	panic("unreachable")
 }
 
-func (r *jsonArrayReader) readList(t TypeRef) List {
+func (r *jsonArrayReader) readList(t TypeRef) NomsValue {
 	desc := t.Desc.(CompoundDesc)
 	ll := []Value{}
 	elemType := desc.ElemTypes[0]
 	for !r.atEnd() {
 		v := r.readValue(elemType)
-		ll = append(ll, v)
+		ll = append(ll, v.NomsValue())
 	}
-	return NewList(ll...)
+
+	return ToNomsValueFromTypeRef(t, NewList(ll...))
 }
 
-func (r *jsonArrayReader) readSet(t TypeRef) Set {
+func (r *jsonArrayReader) readSet(t TypeRef) NomsValue {
 	desc := t.Desc.(CompoundDesc)
 	ll := []Value{}
 	elemType := desc.ElemTypes[0]
 	for !r.atEnd() {
 		v := r.readValue(elemType)
-		ll = append(ll, v)
+		ll = append(ll, v.NomsValue())
 	}
-	return NewSet(ll...)
+	return ToNomsValueFromTypeRef(t, NewSet(ll...))
 }
 
-func (r *jsonArrayReader) readMap(t TypeRef) Map {
+func (r *jsonArrayReader) readMap(t TypeRef) NomsValue {
 	desc := t.Desc.(CompoundDesc)
 	ll := []Value{}
 	keyType := desc.ElemTypes[0]
@@ -136,12 +137,12 @@ func (r *jsonArrayReader) readMap(t TypeRef) Map {
 	for !r.atEnd() {
 		k := r.readValue(keyType)
 		v := r.readValue(valueType)
-		ll = append(ll, k, v)
+		ll = append(ll, k.NomsValue(), v.NomsValue())
 	}
-	return NewMap(ll...)
+	return ToNomsValueFromTypeRef(t, NewMap(ll...))
 }
 
-func (r *jsonArrayReader) readStruct(t TypeRef) Map {
+func (r *jsonArrayReader) readStruct(external, t TypeRef) NomsValue {
 	desc := t.Desc.(StructDesc)
 	m := NewMap(
 		NewString("$name"), NewString(t.Name()),
@@ -152,28 +153,28 @@ func (r *jsonArrayReader) readStruct(t TypeRef) Map {
 			b := r.read().(bool)
 			if b {
 				v := r.readValue(f.T)
-				m = m.Set(NewString(f.Name), v)
+				m = m.Set(NewString(f.Name), v.NomsValue())
 			}
 		} else {
 			v := r.readValue(f.T)
-			m = m.Set(NewString(f.Name), v)
+			m = m.Set(NewString(f.Name), v.NomsValue())
 		}
 	}
 	if len(desc.Union) > 0 {
 		i := uint32(r.read().(float64))
 		m = m.Set(NewString("$unionIndex"), UInt32(i))
 		v := r.readValue(desc.Union[i].T)
-		m = m.Set(NewString("$unionValue"), v)
+		m = m.Set(NewString("$unionValue"), v.NomsValue())
 	}
 
-	return m
+	return ToNomsValueFromTypeRef(external, m)
 }
 
-func (r *jsonArrayReader) readEnum(TypeRef) Value {
-	return UInt32(r.read().(float64))
+func (r *jsonArrayReader) readEnum(TypeRef) NomsValue {
+	return valueAsNomsValue{UInt32(r.read().(float64))}
 }
 
-func (r *jsonArrayReader) readValue(t TypeRef) Value {
+func (r *jsonArrayReader) readValue(t TypeRef) NomsValue {
 	switch t.Kind() {
 	case ListKind, MapKind, SetKind:
 		a := r.readArray()
@@ -184,32 +185,51 @@ func (r *jsonArrayReader) readValue(t TypeRef) Value {
 	}
 }
 
-func (r *jsonArrayReader) readTopLevelValue(t TypeRef) Value {
+func (r *jsonArrayReader) readExternal(external TypeRef) NomsValue {
+	packageRef := r.readRef()
+	name := r.readString()
+
+	pkg := LookupPackage(packageRef)
+	typeRef := pkg.NamedTypes().Get(name)
+
+	switch typeRef.Kind() {
+	case StructKind:
+		return r.readStruct(external, typeRef)
+	case EnumKind:
+		return r.readEnum(typeRef)
+	default:
+		panic("unreachable")
+	}
+
+	return nil
+}
+
+func (r *jsonArrayReader) readTopLevelValue(t TypeRef) NomsValue {
 	switch t.Kind() {
 	case BoolKind:
-		return Bool(r.read().(bool))
+		return valueAsNomsValue{Bool(r.read().(bool))}
 	case UInt8Kind:
-		return UInt8(r.read().(float64))
+		return valueAsNomsValue{UInt8(r.read().(float64))}
 	case UInt16Kind:
-		return UInt16(r.read().(float64))
+		return valueAsNomsValue{UInt16(r.read().(float64))}
 	case UInt32Kind:
-		return UInt32(r.read().(float64))
+		return valueAsNomsValue{UInt32(r.read().(float64))}
 	case UInt64Kind:
-		return UInt64(r.read().(float64))
+		return valueAsNomsValue{UInt64(r.read().(float64))}
 	case Int8Kind:
-		return Int8(r.read().(float64))
+		return valueAsNomsValue{Int8(r.read().(float64))}
 	case Int16Kind:
-		return Int16(r.read().(float64))
+		return valueAsNomsValue{Int16(r.read().(float64))}
 	case Int32Kind:
-		return Int32(r.read().(float64))
+		return valueAsNomsValue{Int32(r.read().(float64))}
 	case Int64Kind:
-		return Int64(r.read().(float64))
+		return valueAsNomsValue{Int64(r.read().(float64))}
 	case Float32Kind:
-		return Float32(r.read().(float64))
+		return valueAsNomsValue{Float32(r.read().(float64))}
 	case Float64Kind:
-		return Float64(r.read().(float64))
+		return valueAsNomsValue{Float64(r.read().(float64))}
 	case StringKind:
-		return NewString(r.readString())
+		return valueAsNomsValue{NewString(r.readString())}
 	case BlobKind:
 		panic("not implemented")
 	case ValueKind:
@@ -221,15 +241,15 @@ func (r *jsonArrayReader) readTopLevelValue(t TypeRef) Value {
 	case MapKind:
 		return r.readMap(t)
 	case RefKind:
-		return Ref{r.readRef()}
+		return valueAsNomsValue{Ref{r.readRef()}}
 	case SetKind:
 		return r.readSet(t)
 	case EnumKind:
-		return r.readEnum(t)
+		panic("not allowed")
 	case StructKind:
-		return r.readStruct(t)
+		panic("not allowed")
 	case TypeRefKind:
-		panic("not implemented")
+		return r.readExternal(t)
 	}
 	panic("not reachable")
 }
