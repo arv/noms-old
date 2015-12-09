@@ -1,6 +1,5 @@
-#!/bin/bash
 SRC="main.js"
-OUT="out.js"
+OUT="tagshow.js"
 
 export NODE_ENV=production
 export BABEL_ENV=production-rollup

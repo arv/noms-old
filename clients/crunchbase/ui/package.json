@@ -19,6 +19,7 @@
     "babel-plugin-transform-es2015-parameters": "^6.3.13",
     "babel-polyfill": "^6.3.14",
     "babel-preset-es2015": "^6.3.13",
+    "babel-preset-es2015-rollup": "^1.0.0",
     "babel-preset-react": "^6.3.13",
     "babelify": "^7.2.0",
     "browserify": "^12.0.1",
@@ -30,6 +31,12 @@
     "flow-bin": "^0.19.1",
     "grunt": "^0.4.5",
     "mocha": "^2.3.0",
+    "rollup": "^0.21.2",
+    "rollup-plugin-babel": "^2.2.0",
+    "rollup-plugin-commonjs": "^1.4.0",
+    "rollup-plugin-inject": "^1.2.0",
+    "rollup-plugin-npm": "^1.1.0",
+    "rollup-plugin-replace": "^1.1.0",
     "uglify-js": "^2.6.1",
     "watchify": "^3.6"
   },
@@ -37,11 +44,5 @@
     "start": "cp node_modules/nvd3/build/nv.d3.css nv.d3.css; NOMS_SERVER=http://localhost:8000 NOMS_DATASET_ID=crunchbase/index watchify -o out.js -v -d node_modules/babel-regenerator-runtime/runtime.js src/main.js",
     "build": "./.npm_build_helper.sh",
     "test": "rm -f out.js && eslint src/ && flow src/"
-  },
-  "browserify": {
-    "transform": [
-      "babelify",
-      "envify"
-    ]
   }
 }

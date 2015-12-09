@@ -1,4 +1,3 @@
-#!/bin/bash
 SRC="main.js"
 OUT="out.js"
 
