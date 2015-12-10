@@ -2,8 +2,16 @@
 SRC="main.js"
 OUT="out.js"
 
-export NODE_ENV=production
-export BABEL_ENV=production-rollup
+NOMS_SRC="../../js/src"
+ROLLUP_CMD="node_modules/.bin/rollup --config --input $SRC"
 
-node_modules/.bin/rollup --config --input $SRC \
-    | node_modules/.bin/uglifyjs -c warnings=false -m -w --screw-ie8 > $OUT
+export NODE_ENV=$1
+export BABEL_ENV=$1
+
+if [ $1 == "production" ]; then
+  $ROLLUP_CMD | node_modules/.bin/uglifyjs -c warnings=false -m -w --screw-ie8 > $OUT
+elif [ $1 == "development" ]; then
+  node_modules/.bin/http-server &
+  node_modules/.bin/nodemon --watch . --watch $NOMS_SRC --ignore $OUT \
+      -x "$ROLLUP_CMD > $OUT"
+fi

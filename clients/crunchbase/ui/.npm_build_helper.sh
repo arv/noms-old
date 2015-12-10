@@ -3,7 +3,7 @@ SRC="src/main.js"
 OUT="out.js"
 
 export NODE_ENV=production
-export BABEL_ENV=production-rollup
+export BABEL_ENV=production
 
 cp node_modules/nvd3/build/nv.d3.min.css nvd3.css
 cp node_modules/nvd3/build/nv.d3.min.js nvd3.js
