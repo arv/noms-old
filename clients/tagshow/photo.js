@@ -32,27 +32,27 @@ export default class Photo extends React.Component<DefaultProps, Props, State> {
     };
   }
 
-  shouldComponentUpdate(nextProps: Props, nextState: State) : boolean {
+  shouldComponentUpdate(nextProps: Props, nextState: State): boolean {
     return !eq(nextProps, this.props) || !eq(nextState, this.state);
   }
 
-  async _updatePhoto(props: Props) : Promise<void> {
-    function area(size: Struct) : number {
+  async _updatePhoto(props: Props): Promise<void> {
+    function area(size: Struct): number {
       return size.get('Width') * size.get('Height');
     }
 
     let photo = await readValue(props.photoRef, props.store);
 
-    // Sizes is a Map(Size, String) where the string is a URL.
+    // Sizes is a NomsMap<Size, string> where the string is a URL.
     let sizes = [];
-    photo.get('Sizes').forEach((url, size) => {
+    await (await photo.get('Sizes')).forEach((url, size) => {
       sizes.push({size, url});
     });
     sizes.sort((a, b) => area(a.size) - area(b.size));
     this.setState({photo, sizes});
   }
 
-  render() : ?React.Element {
+  render(): ?React.Element {
     this._updatePhoto(this.props);
 
     if (!this.state.photo || this.state.sizes.length === 0) {
@@ -67,7 +67,7 @@ export default class Photo extends React.Component<DefaultProps, Props, State> {
     );
   }
 
-  getURL() : string {
+  getURL(): string {
     // If there are some remote URLs we can use, just pick the most appropriate size. We need the smallest one that is bigger than our current dimensions.
     let sizes = this.state.sizes;
     let w = this.props.style.width || 0;
