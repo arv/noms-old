@@ -3,8 +3,11 @@
 import type {valueOrPrimitive} from './value.js'; // eslint-disable-line no-unused-vars
 import {Collection} from './collection.js';
 import {equals, less} from './value.js';
-import {invariant} from './assert.js';
+import {invariant, notNull} from './assert.js';
 import {OrderedSequence} from './ordered_sequence.js';
+import {spawn} from './spawn.js';
+
+type MaybePromise<T> = T | Promise<T>;
 
 export class NomsSet<T:valueOrPrimitive> extends Collection<OrderedSequence> {
   async has(key: T): Promise<boolean> {
@@ -12,9 +15,13 @@ export class NomsSet<T:valueOrPrimitive> extends Collection<OrderedSequence> {
     return cursor.valid && equals(cursor.getCurrentKey(), key);
   }
 
-  async first(): Promise<?T> {
-    let cursor = await this.sequence.newCursorAt(this.cs, null);
-    return cursor.valid ? cursor.getCurrent() : null;
+  first(): MaybePromise<?T> {
+    let self = this;
+    return spawn(function*() {
+      let cursor = yield self.sequence.newCursorAt(self.cs, null);
+      notNull(cursor);
+      return cursor.valid ? cursor.getCurrent() : null;
+    });
   }
 
   async forEach(cb: (v: T) => void): Promise<void> {

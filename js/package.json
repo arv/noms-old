@@ -31,7 +31,7 @@
   "scripts": {
     "start": "node build/copy-flow-files.js -w & babel -w src/ -d dist/",
     "build": "node build/copy-flow-files.js && BABEL_ENV=production babel src/ -d dist/",
-    "pretest": "eslint src/ && flow src/",
+    "xxxpretest": "eslint src/ && flow src/",
     "test": "mocha --ui tdd --reporter dot --require babel-polyfill --compilers js:babel-core/register src/"
   },
   "browser": {

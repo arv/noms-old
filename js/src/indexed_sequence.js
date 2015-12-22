@@ -3,23 +3,28 @@
 import type {ChunkStore} from './chunk_store.js';
 import {notNull} from './assert.js';
 import {search, Sequence, SequenceCursor} from './sequence.js';
+import {spawn} from './spawn.js';
+
+type MaybePromise<T> = T | Promise<T>;
 
 export class IndexedSequence<T> extends Sequence<T> {
   getOffset(idx: number): number { // eslint-disable-line no-unused-vars
     throw new Error('override');
   }
 
-  async newCursorAt(cs: ChunkStore, idx: number): Promise<IndexedSequenceCursor> {
+  newCursorAt(cs: ChunkStore, idx: number): MaybePromise<IndexedSequenceCursor> {
     let cursor: ?IndexedSequenceCursor = null;
     let sequence: ?IndexedSequence = this;
 
-    while (sequence) {
-      cursor = new IndexedSequenceCursor(cs, cursor, sequence, 0);
-      idx -= cursor.advanceToOffset(idx);
-      sequence = await cursor.getChildSequence();
-    }
+    return spawn(function*() {
+      while (sequence) {
+        cursor = new IndexedSequenceCursor(cs, cursor, sequence, 0);
+        idx -= cursor.advanceToOffset(idx);
+        sequence = yield cursor.getChildSequence();
+      }
 
-    return notNull(cursor);
+      return notNull(cursor);
+    });
   }
 }
 
