@@ -185,3 +185,4 @@ suite('CompoundSet', () => {
     await testIntersect([], [['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'], ['d', 'e', 'f', 'g', 'h', 'i', 'j', 'k'], ['i', 'j', 'k', 'l', 'm', 'n', 'o', 'p']]);
   });
 });
+

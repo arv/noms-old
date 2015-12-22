@@ -4,8 +4,7 @@ import type {ChunkStore} from './chunk_store.js';
 import {notNull} from './assert.js';
 import {search, Sequence, SequenceCursor} from './sequence.js';
 import {spawn} from './spawn.js';
-
-type MaybePromise<T> = T | Promise<T>;
+import type {MaybePromise} from './spawn.js';
 
 export class IndexedSequence<T> extends Sequence<T> {
   getOffset(idx: number): number { // eslint-disable-line no-unused-vars

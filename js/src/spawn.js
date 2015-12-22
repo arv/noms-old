@@ -1,8 +1,18 @@
 // @flow
 
-type MaybePromise<T> = T | Promise<T>;
+export type MaybePromise<T> = T | Promise<T>;
 
-export function spawn<T>(f: () => any): MaybePromise<T> {
+type GeneratorObject = {
+  next: (v: any) => ResultObject,
+  throw: (ex: any) => ResultObject
+};
+
+type ResultObject = {
+  done: boolean,
+  value: any
+};
+
+export function spawn<T>(f: () => GeneratorObject): MaybePromise<T> {
   try {
     let gen = f();
     return step(gen, 'next', undefined);
@@ -11,7 +21,7 @@ export function spawn<T>(f: () => any): MaybePromise<T> {
   }
 }
 
-function step(gen, m: string, arg: any) {
+function step<T>(gen: GeneratorObject, m: string, arg: any): MaybePromise<T> {
   let value, done;
   try {
     let res = gen[m](arg);

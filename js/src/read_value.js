@@ -8,16 +8,8 @@ import {notNull} from './assert.js';
 type decodeFn = (chunk: Chunk, cs: ChunkStore) => Promise<any>
 let decodeNomsValue: ?decodeFn = null;
 
-let cache = {};
-
 export async function readValue(r: Ref, cs: ChunkStore): Promise<any> {
-  let refStr = r.toString();
-  let chunk = cache[refStr];
-  if (!chunk) {
-    chunk = await cs.get(r);
-    cache[refStr] = chunk;
-  }
-
+  let chunk = await cs.get(r);
   if (chunk.isEmpty()) {
     return null;
   }
