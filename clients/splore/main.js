@@ -39,8 +39,8 @@ function loadAllRefs(r: Ref): Promise<void> {
 
 window.addEventListener('load', async () => {
   httpStore = new HttpStore(nomsServer);
-  let r = Ref.parse('sha1-5380f69030ad209e137dee221704c34b2717a02b');  // Category Software
-  let c = Ref.parse('sha1-c6b9977d49a1ee414c78f305fd0f923352864464');  // Time: Last year
+  let r = Ref.parse('sha1-ed02320e8904294233627d4d44ec201148353c38');
+  let c = Ref.parse('sha1-6f8b0db017c5d2c6c0436db5daea08012dbcc51c');
 
   await loadAllRefs(r);
   await loadAllRefs(c);

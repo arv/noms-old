@@ -50,7 +50,7 @@ export class NomsSet<T:valueOrPrimitive> extends Collection<OrderedSequence> {
     throw new Error('not implemented');
   }
 
-  async intersect(...sets: Array<NomsSet<T>>): Promise<NomsSet<T>> {
+  intersect(...sets: Array<NomsSet<T>>): MaybePromise<NomsSet<T>> {
     if (sets.length === 0) {
       return this;
     }
@@ -60,32 +60,35 @@ export class NomsSet<T:valueOrPrimitive> extends Collection<OrderedSequence> {
       invariant(sets[i].type.equals(this.type));
     }
 
-    let cursor = await this.sequence.newCursorAt(this.cs, null);
-    if (!cursor.valid) {
-      return this;
-    }
-
-    let values: Array<T> = [];
-
-    for (let i = 0; cursor.valid && i < sets.length; i++) {
-      let first = cursor.getCurrent();
-      let set: NomsSet = sets[i];
-      let next = await set.sequence.newCursorAt(set.cs, first);
-      if (!next.valid) {
-        break;
+    const self = this;
+    return spawn(function*() {
+      let cursor = yield self.sequence.newCursorAt(self.cs, null);
+      if (!cursor.valid) {
+        return self;
       }
 
-      cursor = new SetIntersectionCursor(cursor, next);
-      await cursor.align();
-    }
+      let values: Array<T> = [];
 
-    while (cursor.valid) {
-      values.push(cursor.getCurrent());
-      await cursor.advance();
-    }
+      for (let i = 0; cursor.valid && i < sets.length; i++) {
+        let first = cursor.getCurrent();
+        let set: NomsSet = sets[i];
+        let next = yield set.sequence.newCursorAt(set.cs, first);
+        if (!next.valid) {
+          break;
+        }
 
-    // TODO: Chunk the resulting set.
-    return new NomsSet(this.cs, this.type, new SetLeafSequence(this.type, values));
+        cursor = new SetIntersectionCursor(cursor, next);
+        yield cursor.align();
+      }
+
+      while (cursor.valid) {
+        values.push(cursor.getCurrent());
+        yield cursor.advance();
+      }
+
+      // TODO: Chunk the resulting set.
+      return new NomsSet(self.cs, self.type, new SetLeafSequence(self.type, values));
+    })
   }
 }
 
