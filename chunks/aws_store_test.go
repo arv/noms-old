@@ -6,10 +6,10 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/attic-labs/noms/Godeps/_workspace/src/github.com/aws/aws-sdk-go/aws"
-	"github.com/attic-labs/noms/Godeps/_workspace/src/github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/attic-labs/noms/Godeps/_workspace/src/github.com/aws/aws-sdk-go/service/s3"
 	"github.com/attic-labs/noms/Godeps/_workspace/src/github.com/stretchr/testify/suite"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/s3"
 )
 
 func TestAWSStoreTestSuite(t *testing.T) {
@@ -26,7 +26,7 @@ func (suite *AWSStoreTestSuite) SetupTest() {
 
 	m := mockDDB("")
 
-	suite.store = AWSStore{
+	suite.Store = AWSStore{
 		"bucket",
 		"table",
 		suite.s3svc,

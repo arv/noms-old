@@ -6,14 +6,15 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/attic-labs/noms/Godeps/_workspace/src/github.com/aws/aws-sdk-go/aws"
-	"github.com/attic-labs/noms/Godeps/_workspace/src/github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/attic-labs/noms/Godeps/_workspace/src/github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/attic-labs/noms/Godeps/_workspace/src/github.com/aws/aws-sdk-go/aws/defaults"
-	"github.com/attic-labs/noms/Godeps/_workspace/src/github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/attic-labs/noms/Godeps/_workspace/src/github.com/aws/aws-sdk-go/service/s3"
 	"github.com/attic-labs/noms/d"
 	"github.com/attic-labs/noms/ref"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/defaults"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/s3"
 )
 
 var (
@@ -42,17 +43,19 @@ type AWSStore struct {
 }
 
 func NewAWSStore(bucket, table, region, key, secret string) AWSStore {
-	creds := defaults.DefaultConfig.Credentials
+	creds := defaults.CredChain(defaults.Config(), defaults.Handlers())
 
 	if key != "" {
 		creds = credentials.NewStaticCredentials(key, secret, "")
 	}
 
+	sess := session.New(&aws.Config{Region: aws.String(region), Credentials: creds})
+
 	return AWSStore{
 		bucket,
 		table,
-		s3.New(&aws.Config{Region: &region, Credentials: creds}),
-		dynamodb.New(&aws.Config{Region: &region, Credentials: creds}),
+		s3.New(sess),
+		dynamodb.New(sess),
 	}
 }
 
@@ -107,7 +110,7 @@ func (s AWSStore) UpdateRoot(current, last ref.Ref) bool {
 	return true
 }
 
-func (s AWSStore) Get(ref ref.Ref) io.ReadCloser {
+func (s AWSStore) Get(ref ref.Ref) Chunk {
 	result, err := s.awsSvc.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(s.bucket),
 		Key:    aws.String(ref.String()),
@@ -115,10 +118,12 @@ func (s AWSStore) Get(ref ref.Ref) io.ReadCloser {
 
 	// TODO: S3 storage is eventually consistent, so in theory, we could fail to read a value by ref which hasn't propogated yet. Implement existence checks & retry.
 	if err != nil {
-		return nil
+		return EmptyChunk
 	}
 
-	return result.Body
+	w := NewChunkWriter()
+	io.Copy(w, result.Body)
+	return w.Chunk()
 }
 
 func (s AWSStore) Has(ref ref.Ref) bool {
@@ -129,21 +134,17 @@ func (s AWSStore) Has(ref ref.Ref) bool {
 	return err == nil
 }
 
-func (s AWSStore) Put() ChunkWriter {
-	return newChunkWriter(s.write)
-}
-
-func (s AWSStore) write(ref ref.Ref, buff *bytes.Buffer) {
-	if s.Has(ref) {
-		return
-	}
-
+func (s AWSStore) Put(c Chunk) {
 	_, err := s.awsSvc.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String(s.bucket),
-		Key:    aws.String(ref.String()),
-		Body:   bytes.NewReader(buff.Bytes()),
+		Key:    aws.String(c.Ref().String()),
+		Body:   bytes.NewReader(c.Data()),
 	})
 	d.Chk.NoError(err)
+}
+
+func (s AWSStore) Close() error {
+	return nil
 }
 
 type awsStoreFlags struct {
