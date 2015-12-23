@@ -72,9 +72,11 @@ func (l *LevelDBStore) UpdateRoot(current, last ref.Ref) bool {
 }
 
 func (l *LevelDBStore) Get(ref ref.Ref) Chunk {
+	l.concurrentWriteLimit <- struct{}{}
 	key := toChunkKey(ref)
 	data, err := l.db.Get(key, nil)
 	l.getCount++
+	defer func() { <-l.concurrentWriteLimit }()
 	if err == errors.ErrNotFound {
 		return EmptyChunk
 	}
@@ -84,10 +86,12 @@ func (l *LevelDBStore) Get(ref ref.Ref) Chunk {
 }
 
 func (l *LevelDBStore) Has(ref ref.Ref) bool {
+	l.concurrentWriteLimit <- struct{}{}
 	key := toChunkKey(ref)
 	exists, err := l.db.Has(key, &opt.ReadOptions{DontFillCache: true}) // This isn't really a "read", so don't signal the cache to treat it as one.
 	d.Chk.NoError(err)
 	l.hasCount++
+	<-l.concurrentWriteLimit
 	return exists
 }
 
