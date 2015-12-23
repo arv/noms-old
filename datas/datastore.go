@@ -33,9 +33,10 @@ func NewDataStore(cs chunks.ChunkStore) DataStore {
 }
 
 type Flags struct {
-	ldb    chunks.LevelDBStoreFlags
-	memory chunks.MemoryStoreFlags
-	hflags chunks.HttpStoreFlags
+	ldb      chunks.LevelDBStoreFlags
+	memory   chunks.MemoryStoreFlags
+	hflags   chunks.HttpStoreFlags
+	awsFlags chunks.AwsStoreFlags
 }
 
 func NewFlags() Flags {
@@ -47,12 +48,14 @@ func NewFlagsWithPrefix(prefix string) Flags {
 		chunks.LevelDBFlags(prefix),
 		chunks.MemoryFlags(prefix),
 		chunks.HttpFlags(prefix),
+		chunks.AwsFlags(prefix),
 	}
 }
 
 func (f Flags) CreateDataStore() (DataStore, bool) {
 	var cs chunks.ChunkStore
 	if cs = f.ldb.CreateStore(); cs != nil {
+	} else if cs = f.awsFlags.CreateStore(); cs != nil {
 	} else if cs = f.memory.CreateStore(); cs != nil {
 	}
 

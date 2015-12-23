@@ -147,7 +147,7 @@ func (s AWSStore) Close() error {
 	return nil
 }
 
-type awsStoreFlags struct {
+type AwsStoreFlags struct {
 	awsBucket   *string
 	dynamoTable *string
 	awsRegion   *string
@@ -156,8 +156,8 @@ type awsStoreFlags struct {
 	awsSecret   *string
 }
 
-func awsFlags(prefix string) awsStoreFlags {
-	return awsStoreFlags{
+func AwsFlags(prefix string) AwsStoreFlags {
+	return AwsStoreFlags{
 		flag.String(prefix+"aws-bucket", "", "aws bucket to create an aws-based chunkstore in"),
 		flag.String(prefix+"aws-dynamo-table", "noms-root", "dynamodb table to store the root of the aws-based chunkstore in"),
 		flag.String(prefix+"aws-region", "us-west-2", "aws region to put the aws-based chunkstore in"),
@@ -167,7 +167,7 @@ func awsFlags(prefix string) awsStoreFlags {
 	}
 }
 
-func (f awsStoreFlags) createStore() ChunkStore {
+func (f AwsStoreFlags) CreateStore() ChunkStore {
 	if *f.awsBucket == "" || *f.awsRegion == "" || *f.dynamoTable == "" {
 		return nil
 	}
