@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"sync"
 	"time"
 
 	"github.com/attic-labs/noms/Godeps/_workspace/src/github.com/aws/aws-sdk-go/aws"
@@ -43,9 +44,10 @@ type AWSStore struct {
 	ddbsvc        ddbsvc
 	totalTime     int64
 	writeCount    int64
+	mu            sync.Mutex
 }
 
-func NewAWSStore(bucket, table, region, key, secret string) AWSStore {
+func NewAWSStore(bucket, table, region, key, secret string) *AWSStore {
 	creds := defaults.CredChain(defaults.Config(), defaults.Handlers())
 
 	if key != "" {
@@ -54,17 +56,19 @@ func NewAWSStore(bucket, table, region, key, secret string) AWSStore {
 
 	sess := session.New(&aws.Config{Region: aws.String(region), Credentials: creds})
 
-	return AWSStore{
+	store := AWSStore{
 		bucket,
 		table,
 		s3.New(sess),
 		dynamodb.New(sess),
 		0,
 		0,
+		sync.Mutex{},
 	}
+	return &store
 }
 
-func (s AWSStore) Root() ref.Ref {
+func (s *AWSStore) Root() ref.Ref {
 	result, err := s.ddbsvc.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(s.table),
 		Key: map[string]*dynamodb.AttributeValue{
@@ -81,7 +85,7 @@ func (s AWSStore) Root() ref.Ref {
 	return ref.Parse(*(result.Item[rootTableRef].S))
 }
 
-func (s AWSStore) UpdateRoot(current, last ref.Ref) bool {
+func (s *AWSStore) UpdateRoot(current, last ref.Ref) bool {
 	putArgs := dynamodb.PutItemInput{
 		TableName: aws.String(s.table),
 		Item: map[string]*dynamodb.AttributeValue{
@@ -115,7 +119,7 @@ func (s AWSStore) UpdateRoot(current, last ref.Ref) bool {
 	return true
 }
 
-func (s AWSStore) Get(ref ref.Ref) Chunk {
+func (s *AWSStore) Get(ref ref.Ref) Chunk {
 	result, err := s.awsSvc.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(s.bucket),
 		Key:    aws.String(ref.String()),
@@ -131,7 +135,7 @@ func (s AWSStore) Get(ref ref.Ref) Chunk {
 	return w.Chunk()
 }
 
-func (s AWSStore) Has(ref ref.Ref) bool {
+func (s *AWSStore) Has(ref ref.Ref) bool {
 	_, err := s.awsSvc.HeadObject(&s3.HeadObjectInput{
 		Bucket: aws.String(s.bucket),
 		Key:    aws.String(ref.String()),
@@ -139,19 +143,23 @@ func (s AWSStore) Has(ref ref.Ref) bool {
 	return err == nil
 }
 
-func (s AWSStore) Put(c Chunk) {
-	s.writeCount++
+func (s *AWSStore) Put(c Chunk) {
 	n := time.Now().UnixNano()
+	defer func() {
+		s.mu.Lock()
+		s.writeCount++
+		s.totalTime += time.Now().UnixNano() - n
+		s.mu.Unlock()
+	}()
 	_, err := s.awsSvc.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String(s.bucket),
 		Key:    aws.String(c.Ref().String()),
 		Body:   bytes.NewReader(c.Data()),
 	})
-	s.totalTime += time.Now().UnixNano() - n
 	d.Chk.NoError(err)
 }
 
-func (s AWSStore) Close() error {
+func (s *AWSStore) Close() error {
 	fmt.Printf("Count: %d, Latency: %d\n", s.writeCount, s.totalTime/s.writeCount)
 	return nil
 }
