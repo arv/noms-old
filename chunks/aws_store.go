@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/attic-labs/noms/Godeps/_workspace/src/github.com/aws/aws-sdk-go/aws"
 	"github.com/attic-labs/noms/Godeps/_workspace/src/github.com/aws/aws-sdk-go/aws/awserr"
@@ -40,6 +41,8 @@ type AWSStore struct {
 	bucket, table string
 	awsSvc        awsSvc
 	ddbsvc        ddbsvc
+	totalTime     int64
+	writeCount    int64
 }
 
 func NewAWSStore(bucket, table, region, key, secret string) AWSStore {
@@ -56,6 +59,8 @@ func NewAWSStore(bucket, table, region, key, secret string) AWSStore {
 		table,
 		s3.New(sess),
 		dynamodb.New(sess),
+		0,
+		0,
 	}
 }
 
@@ -135,15 +140,19 @@ func (s AWSStore) Has(ref ref.Ref) bool {
 }
 
 func (s AWSStore) Put(c Chunk) {
+	s.writeCount++
+	n := time.Now().UnixNano()
 	_, err := s.awsSvc.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String(s.bucket),
 		Key:    aws.String(c.Ref().String()),
 		Body:   bytes.NewReader(c.Data()),
 	})
+	s.totalTime += time.Now().UnixNano() - n
 	d.Chk.NoError(err)
 }
 
 func (s AWSStore) Close() error {
+	fmt.Printf("Count: %d, Latency: %d\n", s.writeCount, s.totalTime/s.writeCount)
 	return nil
 }
 
