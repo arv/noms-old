@@ -13,12 +13,12 @@ import {
   makeStructType,
   makeSetType,
   makeMapType,
-  Type,
   stringType,
   valueType,
 } from './type.js';
 import Commit from './commit.js';
 import {equals} from './compare.js';
+import type {Type} from './type.js';
 
 type DatasTypes = {
   commitType: Type,

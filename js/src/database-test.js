@@ -4,7 +4,7 @@ import {suite, test} from 'mocha';
 import {makeTestingBatchStore} from './batch-store-adaptor.js';
 import {emptyRef} from './ref.js';
 import {assert} from 'chai';
-import Commit from './commit.js';
+import Commit, {findCommitType} from './commit.js';
 import Database from './database.js';
 import {invariant, notNull} from './assert.js';
 import List from './list.js';
@@ -12,6 +12,15 @@ import Map from './map.js';
 import {encodeNomsValue} from './encode.js';
 import NomsSet from './set.js'; // namespace collision with JS Set
 import {equals} from './compare.js';
+import {
+  makeRefType,
+  makeSetType,
+  makeStructType,
+  makeUnionType,
+  numberType,
+  stringType,
+  valueType,
+} from './type.js';
 
 suite('Database', () => {
   test('access', async () => {
@@ -221,5 +230,34 @@ suite('Database', () => {
     const l5 = new List([ds.writeValue(s1), s3]);
     assert.strictEqual(2, ds.writeValue(l5).height);
     await ds.close();
+  });
+
+  test('commit type', () => {
+    const a1 = findCommitType(makeSetType(makeUnionType([])), numberType);
+    const t1 = makeStructType('Commit', {
+      value: numberType,
+      parents: valueType,  // placeholder
+    });
+    t1.desc.fields.parents = makeSetType(makeRefType(t1));
+    assert.isTrue(equals(a1, t1));
+
+    const a2 = findCommitType(makeSetType(makeRefType(t1)), numberType);
+    assert.isTrue(equals(a2, t1));
+
+    const a3 = findCommitType(makeSetType(makeRefType(t1)), stringType);
+    const t2 = makeStructType('Commit', {
+      value: stringType,
+      parents: valueType,  // placeholder
+    });
+    t2.desc.fields.parents = makeSetType(makeUnionType([makeRefType(t1), makeRefType(t2)]));
+    assert.isTrue(equals(a3, t2));
+
+    const a4 = findCommitType(makeSetType(makeUnionType([makeRefType(t1), makeRefType(t2)])),
+                              stringType);
+    assert.isTrue(equals(a4, t2));
+
+    const a5 = findCommitType(makeSetType(makeUnionType([makeRefType(t1), makeRefType(t2)])),
+                              numberType);
+    assert.isTrue(equals(a5, t1));
   });
 });
