@@ -1,6 +1,10 @@
 package datas
 
-import "github.com/attic-labs/noms/types"
+import (
+	"fmt"
+
+	"github.com/attic-labs/noms/types"
+)
 
 var commitType *types.Type
 
@@ -37,19 +41,7 @@ func NewCommit(value types.Value, parents ...types.Ref) types.Struct {
 		ValueField:   value,
 		ParentsField: types.NewSet(parentValues...),
 	}
-	return types.NewStructWithType(st, initialFields)
-}
-
-func typeForMapOfStringToRefOfCommit() *types.Type {
-	return types.MakeMapType(types.StringType, types.MakeRefType(commitType))
-}
-
-func NewMapOfStringToRefOfCommit() types.Map {
-	return types.NewMap()
-}
-
-func typeForSetOfRefOfCommit() *types.Type {
-	return types.MakeSetType(types.MakeRefType(commitType))
+	return types.NewStructWithTypeNoValidation(st, initialFields)
 }
 
 func findCommitType(parentTypes []*types.Type, vt *types.Type) *types.Type {
@@ -68,4 +60,9 @@ func findCommitType(parentTypes []*types.Type, vt *types.Type) *types.Type {
 	parentTypes = append(parentTypes, types.MakeRefType(st))
 	st.Desc.(types.StructDesc).Fields["parents"] = types.MakeSetType(types.MakeUnionType(parentTypes...))
 	return st
+}
+
+func IsCommitType(t *types.Type) bool {
+	fmt.Printf("\n\ncommitType:\n%s\n\nt:\n%s\n\n", commitType.Describe(), t.Describe())
+	return types.IsSubtype(commitType, t)
 }

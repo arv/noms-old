@@ -60,7 +60,11 @@ func (ds *Dataset) Commit(v types.Value) (Dataset, error) {
 // CommitWithParents updates the commit that a dataset points at. The new Commit is constructed using v and p.
 // If the update cannot be performed, e.g., because of a conflict, CommitWithParents returns an 'ErrMergeNeeded' error and the current snapshot of the dataset so that the client can merge the changes and try again.
 func (ds *Dataset) CommitWithParents(v types.Value, p types.Set) (Dataset, error) {
-	newCommit := datas.NewCommit().Set(datas.ParentsField, p).Set(datas.ValueField, v)
+	ps := make([]types.Ref, 0, p.Len())
+	p.IterAll(func(v types.Value) {
+		ps = append(ps, v.(types.Ref))
+	})
+	newCommit := datas.NewCommit(v, ps...)
 	store, err := ds.Store().Commit(ds.id, newCommit)
 	return Dataset{store, ds.id}, err
 }
@@ -99,7 +103,9 @@ func (ds *Dataset) validateRefAsCommit(r types.Ref) types.Struct {
 	v := ds.store.ReadValue(r.TargetRef())
 
 	d.Exp.NotNil(v, "%v cannot be found", r)
-	d.Exp.True(v.Type().Equals(datas.NewCommit().Type()), "Not a Commit: %+v", v)
+	d.Exp.True(datas.IsCommitType(v.Type()), "Not a Commit: %+v", v)
+	// d.Exp.True(datas.IsCommitSubtype(requiredType, v.Type())
+	// v.Type().Equals(datas.NewCommit().Type()), "Not a Commit: %+v", v)
 	return v.(types.Struct)
 }
 

@@ -29,6 +29,10 @@ func NewStruct(name string, data structData) Struct {
 	return newStructFromData(newData, t)
 }
 
+func NewStructWithTypeNoValidation(t *Type, data structData) Struct {
+	return newStructFromData(data, t)
+}
+
 func NewStructWithType(t *Type, data structData) Struct {
 	newData := make(structData, len(data))
 	desc := t.Desc.(StructDesc)

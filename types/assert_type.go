@@ -3,19 +3,23 @@ package types
 import "github.com/attic-labs/noms/d"
 
 func assertSubtype(t *Type, v Value) {
-	if !isSubtype(t, v.Type()) {
+	if !IsSubtype(t, v.Type()) {
 		d.Chk.Fail("Invalid type", "Expected: %s, found: %s", t.Describe(), v.Type().Describe())
 	}
 }
 
-func isSubtype(requiredType, concreteType *Type) bool {
+func IsSubtype(requiredType, concreteType *Type) bool {
+	return isSubtype(requiredType, concreteType, nil, nil)
+}
+
+func isSubtype(requiredType, concreteType *Type, requiredParentStructTypes, concreteParentStructTypes []*Type) bool {
 	if requiredType.Equals(concreteType) {
 		return true
 	}
 
 	if requiredType.Kind() == UnionKind {
 		for _, t := range requiredType.Desc.(CompoundDesc).ElemTypes {
-			if isSubtype(t, concreteType) {
+			if isSubtype(t, concreteType, requiredParentStructTypes, concreteParentStructTypes) {
 				return true
 			}
 		}
@@ -29,7 +33,7 @@ func isSubtype(requiredType, concreteType *Type) bool {
 	if desc, ok := requiredType.Desc.(CompoundDesc); ok {
 		concreteElemTypes := concreteType.Desc.(CompoundDesc).ElemTypes
 		for i, t := range desc.ElemTypes {
-			if !compoundSubtype(t, concreteElemTypes[i]) {
+			if !compoundSubtype(t, concreteElemTypes[i], requiredParentStructTypes, concreteParentStructTypes) {
 				return false
 			}
 		}
@@ -39,6 +43,8 @@ func isSubtype(requiredType, concreteType *Type) bool {
 	if requiredType.Kind() == StructKind {
 		requiredDesc := requiredType.Desc.(StructDesc)
 		concreteDesc := concreteType.Desc.(StructDesc)
+		requiredParentStructTypes = append(requiredParentStructTypes, requiredType)
+		concreteParentStructTypes = append(concreteParentStructTypes, concreteType)
 		if requiredDesc.Name != "" && requiredDesc.Name != concreteDesc.Name {
 			return false
 		}
@@ -52,7 +58,7 @@ func isSubtype(requiredType, concreteType *Type) bool {
 		})
 		for _, entry := range entries {
 			at, ok := concreteDesc.Fields[entry.name]
-			if !ok || !isSubtype(entry.t, at) {
+			if !ok || !isSubtype(entry.t, at, requiredParentStructTypes, concreteParentStructTypes) {
 				return false
 			}
 		}
@@ -62,10 +68,10 @@ func isSubtype(requiredType, concreteType *Type) bool {
 	panic("unreachable")
 }
 
-func compoundSubtype(requiredType, concreteType *Type) bool {
+func compoundSubtype(requiredType, concreteType *Type, requiredParentStructTypes, concreteParentStructTypes []*Type) bool {
 	// In a compound type it is OK to have an empty union.
 	if concreteType.Kind() == UnionKind && len(concreteType.Desc.(CompoundDesc).ElemTypes) == 0 {
 		return true
 	}
-	return isSubtype(requiredType, concreteType)
+	return isSubtype(requiredType, concreteType, requiredParentStructTypes, concreteParentStructTypes)
 }

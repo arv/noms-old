@@ -211,6 +211,34 @@ func TestAssertTypeStructSubtype(tt *testing.T) {
 		"parents": NewSet(NewRef(c1)),
 	})
 	assertSubtype(t11, c2)
+}
 
-	// t3 :=
+func TestAssertTypeRecursive(tt *testing.T) {
+	/*
+		t1:
+		struct "" {
+		  s: Set<Ref<Parent<0>>>
+		  v: Value
+		}
+
+		t2:
+		struct "" {
+		  s: Set<Ref<Parent<0>>>
+		  v: Map<String, Ref<List<>> | Ref<List<Number>>>
+		}
+	*/
+
+	t1 := MakeStructType("", TypeMap{
+		"v": ValueType,
+		"s": NumberType, // placeholder
+	})
+	t1.Desc.(StructDesc).Fields["s"] = MakeSetType(MakeRefType(t1))
+
+	t2 := MakeStructType("", TypeMap{
+		"v": NumberType,
+		"s": NumberType, // placeholder
+	})
+	t2.Desc.(StructDesc).Fields["s"] = MakeSetType(MakeRefType(t2))
+
+	assert.True(tt, IsSubtype(t1, t2))
 }

@@ -78,6 +78,8 @@ func (suite *DatabaseSuite) TestReadWriteCachePersists() {
 	suite.NoError(err)
 	suite.Equal(1, suite.cs.Writes-writesOnCommit)
 
+	suite.NotNil(r)
+
 	newCommit := NewCommit(r, types.NewRef(commit))
 	suite.ds, err = suite.ds.Commit("foo", newCommit)
 	suite.NoError(err)

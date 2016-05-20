@@ -54,7 +54,7 @@ func (ds *databaseCommon) HeadRef(datasetID string) types.Ref {
 func (ds *databaseCommon) Datasets() types.Map {
 	if ds.datasets == nil {
 		if ds.rootRef.IsEmpty() {
-			emptyMap := NewMapOfStringToRefOfCommit()
+			emptyMap := types.NewMap()
 			ds.datasets = &emptyMap
 		} else {
 			ds.datasets = ds.datasetsFromRef(ds.rootRef)
