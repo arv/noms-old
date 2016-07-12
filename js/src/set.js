@@ -12,9 +12,9 @@ import {Collection} from './collection.js';
 import {compare, equals} from './compare.js';
 import {getRefOfValue} from './get-ref.js';
 import {invariant} from './assert.js';
-import {MetaTuple, newOrderedMetaSequenceBoundaryChecker, newOrderedMetaSequenceChunkFn,} from
+import {MetaTuple, newOrderedMetaSequenceBoundaryChecker, newOrderedMetaSequenceChunkFn} from
   './meta-sequence.js';
-import {OrderedSequence, OrderedSequenceCursor, OrderedSequenceIterator,} from
+import {OrderedSequence, OrderedSequenceCursor, OrderedSequenceIterator} from
   './ordered-sequence.js';
 import diff from './ordered-sequence-diff.js';
 import {makeSetType, makeUnionType, getTypeOfValue} from './type.js';

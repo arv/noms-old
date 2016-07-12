@@ -177,7 +177,6 @@ suite('Database', () => {
     assert.strictEqual(1, datasets.size);
     const fooHead = await ds.head('foo');
     invariant(fooHead);
-    debugger
     assert.isTrue(equals(fooHead, commit));
     const barHead = await ds.head('bar');
     assert.isNull(barHead);

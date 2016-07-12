@@ -593,7 +593,7 @@ suite('Decode', () => {
   });
 
   test('read empty union list', async () => {
-    const a = parseJson(`[ListKind, UnionKind, 0, false, []]`);
+    const a = parseJson('[ListKind, UnionKind, 0, false, []]');
     const r = new JsonArrayReader(a, db);
     const v = r.readValue();
     const v2 = new List();
