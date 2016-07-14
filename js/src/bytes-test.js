@@ -181,4 +181,16 @@ suite('Bytes', () => {
     test([1, 2, 3, 4, 5]);
     test([2, 3, 4, 5, 10]);
   });
+
+  test('utf8ByteLength', () => {
+    const strings = [
+      '',
+      'a',
+      '💩',
+      'x'.repeat(256),
+    ];
+    for (const str of strings) {
+      assert.equal(NodeBytes.utf8ByteLength(str), BrowserBytes.utf8ByteLength(str));
+    }
+  });
 });
