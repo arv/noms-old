@@ -36,6 +36,7 @@ func (vbs *ValidatingBatchingSink) Enqueue(c chunks.Chunk) chunks.BackpressureEr
 	if vbs.vs.isPresent(h) {
 		return nil
 	}
+	// TODO: Use orderedParalell
 	v := DecodeFromBytes(c.Data(), vbs.vs, vbs.tc)
 	d.PanicIfTrue(getHash(v) != h, "Invalid hash found")
 	vbs.vs.ensureChunksInCache(v)

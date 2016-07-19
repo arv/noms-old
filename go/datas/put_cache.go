@@ -36,6 +36,7 @@ func newOrderedChunkCache() *orderedChunkCache {
 		orderedChunks: db,
 		chunkIndex:    map[hash.Hash][]byte{},
 		dbDir:         dir,
+		size:          0,
 		mu:            &sync.RWMutex{},
 	}
 }
@@ -45,6 +46,7 @@ type orderedChunkCache struct {
 	orderedChunks *leveldb.DB
 	chunkIndex    map[hash.Hash][]byte
 	dbDir         string
+	size          uint64
 	mu            *sync.RWMutex
 }
 
@@ -81,6 +83,7 @@ func (p *orderedChunkCache) Insert(c chunks.Chunk, refHeight uint64) bool {
 		gw := snappy.NewBufferedWriter(buf)
 		chunks.Serialize(c, gw)
 		gw.Close()
+		p.size += uint64(len(buf.Bytes()))
 		d.Chk.NoError(p.orderedChunks.Put(dbKey, buf.Bytes(), nil))
 		return true
 	}
@@ -114,6 +117,7 @@ func (p *orderedChunkCache) Get(hash hash.Hash) chunks.Chunk {
 
 // Clear can be called from any goroutine to remove chunks referenced by the given hashes from the cache.
 func (p *orderedChunkCache) Clear(hashes hashSet) {
+	p.size = 0 // TODO: Lock?
 	deleteBatch := &leveldb.Batch{}
 	p.mu.Lock()
 	for hash := range hashes {

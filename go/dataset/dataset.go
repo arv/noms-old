@@ -87,7 +87,9 @@ func (ds *Dataset) Commit(v types.Value) (Dataset, error) {
 // If the update cannot be performed, e.g., because of a conflict, CommitWithParents returns an 'ErrMergeNeeded' error and the current snapshot of the dataset so that the client can merge the changes and try again.
 func (ds *Dataset) CommitWithParents(v types.Value, p types.Set) (Dataset, error) {
 	newCommit := datas.NewCommit(v, p)
+	// fmt.Println("Dataset committing...")
 	store, err := ds.Database().Commit(ds.id, newCommit)
+	// fmt.Println("Dataset done committing!")
 	return Dataset{store, ds.id}, err
 }
 

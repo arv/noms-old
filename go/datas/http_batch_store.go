@@ -21,6 +21,8 @@ import (
 	"github.com/attic-labs/noms/go/d"
 	"github.com/attic-labs/noms/go/hash"
 	"github.com/attic-labs/noms/go/types"
+	"github.com/attic-labs/noms/go/util/status"
+	humanize "github.com/dustin/go-humanize"
 	"github.com/golang/snappy"
 	"github.com/julienschmidt/httprouter"
 )
@@ -365,10 +367,22 @@ func (bhcs *httpBatchStore) batchPutRequests() {
 	}()
 }
 
+type progressReader struct {
+	io.Reader
+	Reporter func(r int64)
+}
+
+func (pr *progressReader) Read(p []byte) (n int, err error) {
+	n, err = pr.Reader.Read(p)
+	pr.Reporter(int64(n))
+	return
+}
+
 func (bhcs *httpBatchStore) sendWriteRequests(hashes hashSet, hints types.Hints) {
 	if len(hashes) == 0 {
 		return
 	}
+
 	bhcs.rateLimit <- struct{}{}
 	go func() {
 		defer func() {
@@ -383,13 +397,25 @@ func (bhcs *httpBatchStore) sendWriteRequests(hashes hashSet, hints types.Hints)
 			serializedChunks, pw := io.Pipe()
 			errChan := make(chan error)
 			go func() {
-				err := bhcs.unwrittenPuts.ExtractChunks(hashes, pw)
+				extractError := bhcs.unwrittenPuts.ExtractChunks(hashes, pw)
 				// The ordering of these is important. Close the pipe so that the HTTP stack which is reading from serializedChunks knows it has everything, and only THEN block on errChan.
 				pw.Close()
-				errChan <- err
+				errChan <- extractError
 				close(errChan)
 			}()
-			body := buildWriteValueRequest(serializedChunks, hints)
+
+			startTime := time.Now()
+			seen := uint64(0)
+			body := &progressReader{
+				buildWriteValueRequest(serializedChunks, hints),
+				func(r int64) {
+					// TODO: Use progressReader
+					elapsed := time.Since(startTime)
+					seen += uint64(r)
+					percent := float64(seen) / float64(bhcs.unwrittenPuts.size) * 100
+					rate := float64(seen) / elapsed.Seconds()
+					status.Printf("Sending %.2f%% of %s (%s/s)...", percent, humanize.Bytes(bhcs.unwrittenPuts.size), humanize.Bytes(uint64(rate)))
+				}}
 
 			url := *bhcs.host
 			url.Path = httprouter.CleanPath(bhcs.host.Path + constants.WriteValuePath)
